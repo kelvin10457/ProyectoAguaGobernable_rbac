@@ -1,78 +1,29 @@
-# React + TypeScript + Vite
+# Plataforma JAAP El Limón–Havoline
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Real implementation of the `Plataforma JAAP.dc.html` design (see `../README.md`, `../chats/chat1.md`, and `../project/`) — a platform for the JAAP El Limón–Havoline water board: general info, capacity-building videos, monthly water-quality/quantity parameters, and a tariff calculator.
 
-Currently, two official plugins are available:
+Stack: React 19 + TypeScript + Tailwind CSS v4 (Vite). This is a frontend-only build: there is no backend, admin login accepts any credentials, and edits (parameter values, tariff charges) only persist in memory for the current session — this matches the approved mockup's behavior.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Develop
 
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+## Build
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run build
 ```
+
+## Structure
+
+- `src/state/JaapContext.tsx` — the app's mock state and business logic (role, parámetros edit/publish, tarifa calculator), mirroring the logic embedded in the original `.dc.html` mockup.
+- `src/pages/` — one component per route (Inicio, Información general, Fortalecimiento, Parámetros, Tarifa, Ingreso).
+- `src/components/` — shared chrome (`Header`, `Footer`) and the `Blueprint` frame (the design system's hairline-border + corner-mark wrapper).
+- `src/index.css` — the "Industry" design system's tokens and component classes (buttons, cards, tags, tables, inputs), ported from `../project/industry-styles.css`.
+
+## Known placeholders
+
+Per the mockup: no real photo/map/video assets, and "Costeo del servicio" is intentionally out of scope (shown as "en construcción").
