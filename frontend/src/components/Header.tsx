@@ -10,49 +10,63 @@ const NAV_ITEMS = [
 ];
 
 export default function Header() {
-  const { isAdmin, logout } = useJaap();
+  const { isStaff, logout } = useJaap();
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-10 flex flex-wrap items-center gap-4 border-b border-divider bg-bg px-4 py-3.5">
-      <div className="mr-auto leading-tight">
-        <div className="font-heading text-lg font-semibold">JAAP El Limón–Havoline</div>
-        <div className="text-[11px] uppercase tracking-[0.12em] text-accent-700">525 gotas de esperanza</div>
-      </div>
+    <header className="sticky top-0 z-10 border-b border-divider bg-bg/90 backdrop-blur-sm">
+      <div className="h-[3px] w-full bg-gradient-to-r from-accent-600 via-accent-400 to-green-500" />
+      <div className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center gap-4 px-[18px] py-3">
+        <div className="mr-auto flex items-center gap-2.5">
+          <img
+            src="/logo.png"
+            alt="Logo JAAP El Limón–Havoline"
+            className="h-12 w-12 object-contain transition-transform duration-300 hover:scale-110 hover:rotate-[-4deg]"
+          />
+          <div className="leading-tight">
+            <div className="font-heading text-lg font-semibold text-accent-900">JAAP El Limón–Havoline</div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-green-600">
+              525 gotas de esperanza
+            </div>
+          </div>
+        </div>
 
-      <nav className="flex flex-wrap items-center gap-0.5">
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) =>
-              `border-0 border-b-2 px-2.5 py-1.5 text-sm no-underline hover:bg-accent/10 ${
-                isActive ? 'border-accent text-accent-800' : 'border-transparent text-text'
-              }`
-            }
+        <nav className="flex flex-wrap items-center gap-1">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                `rounded-full px-3.5 py-1.5 text-sm font-medium no-underline transition-colors ${
+                  isActive
+                    ? 'bg-accent-100 text-accent-800'
+                    : 'text-text/65 hover:bg-accent-100/70 hover:text-accent-800'
+                }`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        {isStaff ? (
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => {
+              logout();
+              navigate('/');
+            }}
           >
-            {item.label}
+            Salir
+          </button>
+        ) : (
+          <NavLink to="/ingreso" className="btn btn-secondary">
+            Ingreso
           </NavLink>
-        ))}
-      </nav>
-
-      {isAdmin ? (
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={() => {
-            logout();
-            navigate('/');
-          }}
-        >
-          Salir
-        </button>
-      ) : (
-        <NavLink to="/ingreso" className="btn btn-secondary">
-          Ingreso directiva
-        </NavLink>
-      )}
+        )}
+      </div>
     </header>
   );
 }

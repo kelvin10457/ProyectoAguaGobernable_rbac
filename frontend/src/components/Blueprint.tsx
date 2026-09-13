@@ -7,13 +7,5 @@ interface BlueprintProps {
 }
 
 export default function Blueprint({ as: Tag = 'div', className = '', children }: BlueprintProps) {
-  return (
-    <Tag className={`blueprint ${className}`}>
-      <i className="corner tl" />
-      <i className="corner tr" />
-      <i className="corner bl" />
-      <i className="corner br" />
-      {children}
-    </Tag>
-  );
+  return <Tag className={`blueprint ${className}`}>{children}</Tag>;
 }

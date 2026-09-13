@@ -24,11 +24,26 @@ function TablaParametros({ filas, titulo, nota, columnaLimite }: { filas: TablaF
                 <td className="font-mono text-xs opacity-75">{fila.limite}</td>
                 <td>
                   {fila.editable ? (
-                    <input
-                      className="input max-w-[130px]"
-                      value={fila.valor}
-                      onChange={(e) => fila.onChange(e.target.value)}
-                    />
+                    fila.opciones ? (
+                      <select
+                        className="input max-w-[160px]"
+                        value={fila.valor}
+                        onChange={(e) => fila.onChange(e.target.value)}
+                      >
+                        <option value="">— Sin registro —</option>
+                        {fila.opciones.map((opcion) => (
+                          <option key={opcion} value={opcion}>
+                            {opcion}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        className="input max-w-[130px]"
+                        value={fila.valor}
+                        onChange={(e) => fila.onChange(e.target.value)}
+                      />
+                    )
                   ) : (
                     <span className="font-mono text-sm">{fila.valorTexto}</span>
                   )}
@@ -46,7 +61,19 @@ function TablaParametros({ filas, titulo, nota, columnaLimite }: { filas: TablaF
 }
 
 export default function Parametros() {
-  const { isAdmin, editando, guardado, calidad, cantidad, iniciarEdicion, cancelarEdicion, publicar } = useJaap();
+  const {
+    isStaff,
+    editando,
+    guardado,
+    guardandoParametros,
+    errorParametros,
+    calidad,
+    cantidad,
+    mesParametros,
+    iniciarEdicion,
+    cancelarEdicion,
+    publicar,
+  } = useJaap();
 
   return (
     <section>
@@ -57,26 +84,24 @@ export default function Parametros() {
           </div>
           <h1 className="m-0 mb-1.5 text-[clamp(28px,4.4vw,42px)]">El agua que consumimos</h1>
           <p className="m-0 text-[13px] text-text/65">
-            {isAdmin
+            {isStaff
               ? 'Editas los valores del mes; al publicarlos se actualizan para las 525 familias.'
               : 'Valores publicados por la directiva. Vista de solo lectura.'}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="field">
-            <label>Mes</label>
-            <select className="input min-w-[150px]">
-              <option>Mes 1 · agosto 2026</option>
-              <option>Mes 2 · julio 2026</option>
-              <option>Mes 3 · junio 2026</option>
-            </select>
-          </div>
-          {isAdmin && (
+          {mesParametros && (
+            <div className="field">
+              <label>Mes</label>
+              <div className="input min-w-[150px] opacity-80">{mesParametros}</div>
+            </div>
+          )}
+          {isStaff && (
             <div className="flex items-end gap-2 self-end">
               {editando ? (
                 <>
-                  <button type="button" className="btn btn-primary" onClick={publicar}>
-                    Publicar cambios
+                  <button type="button" className="btn btn-primary" onClick={publicar} disabled={guardandoParametros}>
+                    {guardandoParametros ? 'Publicando…' : 'Publicar cambios'}
                   </button>
                   <button type="button" className="btn btn-secondary" onClick={cancelarEdicion}>
                     Cancelar
@@ -93,9 +118,14 @@ export default function Parametros() {
       </div>
 
       {guardado && (
-        <Blueprint className="mb-[18px] flex items-center gap-2.5 border-accent px-3.5 py-2.5">
-          <span className="tag tag-accent">Publicado</span>
+        <Blueprint className="mb-[18px] flex animate-pop-in items-center gap-2.5 border-green bg-green-100/40 px-3.5 py-2.5">
+          <span className="tag tag-green">Publicado</span>
           <span className="text-[13px]">Los usuarios ya ven los valores actualizados del mes.</span>
+        </Blueprint>
+      )}
+      {errorParametros && (
+        <Blueprint className="mb-[18px] flex animate-pop-in items-center gap-2.5 border-red-600 px-3.5 py-2.5">
+          <span className="text-[13px] text-red-600">{errorParametros}</span>
         </Blueprint>
       )}
 

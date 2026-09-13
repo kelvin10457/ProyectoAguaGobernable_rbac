@@ -1,19 +1,16 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
-import type { EstadoParametro, ParametroRow, Role, TablaBorrador } from '../types';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { api, ApiError, mapAuthUser } from '../lib/api';
+import type {
+  AuthUser,
+  CosteoComponenteData,
+  EstadoParametro,
+  InformacionGeneralData,
+  ParametroRow,
+  Role,
+  TablaBorrador,
+} from '../types';
 
-const CALIDAD_INICIAL: ParametroRow[] = [
-  { nombre: 'Color', limite: '≤ 15 Unidades Pt-Co', valor: '8', estado: 'ok' },
-  { nombre: 'Turbiedad', limite: '≤ 5 UNT', valor: '2.1', estado: 'ok' },
-  { nombre: 'Sabor', limite: 'Aceptable / sin sabor extraño', valor: 'Aceptable', estado: 'ok' },
-  { nombre: 'Olor', limite: 'Aceptable / sin olor extraño', valor: 'Aceptable', estado: 'ok' },
-  { nombre: 'Coliformes', limite: '0 UFC / 100 ml', valor: '0', estado: 'ok' },
-  { nombre: 'Plaguicidas', limite: '≤ 0.03 – 0.1 mg/L', valor: '0.01', estado: 'ok' },
-  { nombre: 'Cianotoxinas', limite: '≤ 1.0 µg/L (microcistina-LR)', valor: '', estado: 'pendiente' },
-];
-
-const CANTIDAD_INICIAL: ParametroRow[] = [
-  { nombre: 'Presión (red / domiciliaria)', limite: '10 – 50 m.c.a. (1.0 – 5.0 bar)', valor: '8', estado: 'alerta' },
-];
+const AUTH_STORAGE_KEY = 'aguaGobernable.auth';
 
 export interface TablaFila {
   nombre: string;
@@ -23,13 +20,31 @@ export interface TablaFila {
   tagClass: string;
   editable: boolean;
   valor: string;
+  opciones?: string[];
   onChange: (valor: string) => void;
 }
 
+interface AuthStorage {
+  token: string;
+  user: AuthUser;
+}
+
+function leerAuthGuardada(): AuthStorage | null {
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as AuthStorage) : null;
+  } catch {
+    return null;
+  }
+}
+
+type LoginResultado = { ok: true } | { ok: false; error: string };
+
 interface JaapContextValue {
   role: Role;
-  isAdmin: boolean;
-  login: () => void;
+  isStaff: boolean;
+  token: string | null;
+  login: (email: string, password: string) => Promise<LoginResultado>;
   logout: () => void;
 
   calidad: TablaFila[];
@@ -37,18 +52,32 @@ interface JaapContextValue {
   cumplenCount: number;
   totalParams: number;
   estadoGeneral: string;
+  mesParametros: string | null;
 
   editando: boolean;
   guardado: boolean;
+  guardandoParametros: boolean;
+  errorParametros: string | null;
   iniciarEdicion: () => void;
   cancelarEdicion: () => void;
   publicar: () => void;
 
-  cedula: string;
+  informacionGeneral: InformacionGeneralData | null;
+  editandoInfo: boolean;
+  guardadoInfo: boolean;
+  guardandoInfo: boolean;
+  errorInfo: string | null;
+  borradorInfo: InformacionGeneralData | null;
+  iniciarEdicionInfo: () => void;
+  cancelarEdicionInfo: () => void;
+  actualizarBorradorInfo: (campo: keyof InformacionGeneralData, valor: string | number) => void;
+  publicarInfo: () => void;
+
+  edad: string;
   medidor: string;
   consumo: string;
   calculado: boolean;
-  setCedula: (v: string) => void;
+  setEdad: (v: string) => void;
   setMedidor: (v: string) => void;
   setConsumo: (v: string) => void;
   calcular: () => void;
@@ -56,12 +85,34 @@ interface JaapContextValue {
 
   cargoFijo: number;
   cargoVariable: number;
+  umbralConsumo: number;
+  descuentoAdultoMayorPct: number;
   setCargoFijo: (v: number) => void;
   setCargoVariable: (v: number) => void;
+  setUmbralConsumo: (v: number) => void;
+  guardandoTarifa: boolean;
+  guardadoTarifa: boolean;
+  errorTarifa: string | null;
+  publicarTarifa: () => void;
 
   consumoNum: number;
+  excedente: number;
   variablePart: number;
+  esAdultoMayor: boolean;
+  subtotal: number;
+  descuento: number;
   total: number;
+
+  costeo: CosteoComponenteData[];
+  puedeEditarCosteo: boolean;
+  editandoCosteo: boolean;
+  guardandoCosteo: boolean;
+  guardadoCosteo: boolean;
+  errorCosteo: string | null;
+  iniciarEdicionCosteo: () => void;
+  cancelarEdicionCosteo: () => void;
+  actualizarCosteoFila: (id: string, campo: 'cantidadAnual' | 'precioUnitario', valor: number | null) => void;
+  publicarCosteo: () => void;
 }
 
 const JaapContext = createContext<JaapContextValue | null>(null);
@@ -79,33 +130,106 @@ function claseEtiqueta(estado: EstadoParametro): string {
 }
 
 export function JaapProvider({ children }: { children: ReactNode }) {
-  const [role, setRole] = useState<Role>('usuario');
+  const [auth, setAuth] = useState<AuthStorage | null>(() => leerAuthGuardada());
+  const role: Role = auth?.user.role ?? 'usuario';
+  const isStaff = role !== 'usuario';
+  const puedeEditarInfoGeneral = role === 'junta';
+  const puedeEditarCosteo = role === 'junta';
+  const token = auth?.token ?? null;
 
-  const [calidadPublicada, setCalidadPublicada] = useState<ParametroRow[]>(CALIDAD_INICIAL);
-  const [cantidadPublicada, setCantidadPublicada] = useState<ParametroRow[]>(CANTIDAD_INICIAL);
+  const [mesParametros, setMesParametros] = useState<string | null>(null);
+  const [calidadPublicada, setCalidadPublicada] = useState<ParametroRow[]>([]);
+  const [cantidadPublicada, setCantidadPublicada] = useState<ParametroRow[]>([]);
   const [editando, setEditando] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [guardandoParametros, setGuardandoParametros] = useState(false);
+  const [errorParametros, setErrorParametros] = useState<string | null>(null);
   const [borrador, setBorrador] = useState<TablaBorrador | null>(null);
 
-  const [cedula, setCedula] = useState('');
+  const [informacionGeneral, setInformacionGeneral] = useState<InformacionGeneralData | null>(null);
+  const [editandoInfo, setEditandoInfo] = useState(false);
+  const [guardadoInfo, setGuardadoInfo] = useState(false);
+  const [guardandoInfo, setGuardandoInfo] = useState(false);
+  const [errorInfo, setErrorInfo] = useState<string | null>(null);
+  const [borradorInfo, setBorradorInfo] = useState<InformacionGeneralData | null>(null);
+
+  const [edad, setEdad] = useState('');
   const [medidor, setMedidor] = useState('');
   const [consumo, setConsumo] = useState('');
   const [calculado, setCalculado] = useState(false);
 
-  const [cargoFijo, setCargoFijo] = useState(2.5);
-  const [cargoVariable, setCargoVariable] = useState(0.35);
+  const [cargoFijo, setCargoFijo] = useState(0);
+  const [cargoVariable, setCargoVariable] = useState(0);
+  const [umbralConsumo, setUmbralConsumo] = useState(0);
+  const [descuentoAdultoMayorPct, setDescuentoAdultoMayorPct] = useState(50);
+  const [guardandoTarifa, setGuardandoTarifa] = useState(false);
+  const [guardadoTarifa, setGuardadoTarifa] = useState(false);
+  const [errorTarifa, setErrorTarifa] = useState<string | null>(null);
 
-  const isAdmin = role === 'admin';
+  const [costeoPublicado, setCosteoPublicado] = useState<CosteoComponenteData[]>([]);
+  const [editandoCosteo, setEditandoCosteo] = useState(false);
+  const [borradorCosteo, setBorradorCosteo] = useState<CosteoComponenteData[] | null>(null);
+  const [guardandoCosteo, setGuardandoCosteo] = useState(false);
+  const [guardadoCosteo, setGuardadoCosteo] = useState(false);
+  const [errorCosteo, setErrorCosteo] = useState<string | null>(null);
 
-  const login = () => setRole('admin');
+  useEffect(() => {
+    api
+      .getParametrosMesActual()
+      .then(({ mes, calidad: c, cantidad: q }) => {
+        setMesParametros(mes);
+        setCalidadPublicada(c);
+        setCantidadPublicada(q);
+      })
+      .catch(() => setErrorParametros('No se pudieron cargar los parámetros'));
+
+    api
+      .getInformacionGeneral()
+      .then(setInformacionGeneral)
+      .catch(() => setErrorInfo('No se pudo cargar la información general'));
+
+    api
+      .getTarifaConfig()
+      .then((config) => {
+        setCargoFijo(config.cargoFijo);
+        setCargoVariable(config.cargoVariable);
+        setUmbralConsumo(config.umbralConsumo);
+        setDescuentoAdultoMayorPct(config.descuentoAdultoMayorPct);
+      })
+      .catch(() => setErrorTarifa('No se pudo cargar la configuración de tarifa'));
+
+    api
+      .getCosteo()
+      .then(setCosteoPublicado)
+      .catch(() => setErrorCosteo('No se pudo cargar el costeo del servicio'));
+  }, []);
+
+  const login = async (email: string, password: string): Promise<LoginResultado> => {
+    try {
+      const { token: nuevoToken, user } = await api.login(email, password);
+      const nuevaAuth: AuthStorage = { token: nuevoToken, user: mapAuthUser(user) };
+      setAuth(nuevaAuth);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nuevaAuth));
+      return { ok: true };
+    } catch (err) {
+      const mensaje = err instanceof ApiError ? err.message : 'No se pudo conectar con el servidor';
+      return { ok: false, error: mensaje };
+    }
+  };
+
   const logout = () => {
-    setRole('usuario');
+    setAuth(null);
+    localStorage.removeItem(AUTH_STORAGE_KEY);
     setEditando(false);
     setBorrador(null);
+    setEditandoInfo(false);
+    setBorradorInfo(null);
+    setEditandoCosteo(false);
+    setBorradorCosteo(null);
   };
 
   function filas(clave: 'calidad' | 'cantidad'): TablaFila[] {
-    const editandoAhora = editando && isAdmin;
+    const editandoAhora = editando && isStaff;
     const publicadas = clave === 'calidad' ? calidadPublicada : cantidadPublicada;
     const fuente = editandoAhora && borrador ? borrador[clave] : publicadas;
 
@@ -120,6 +244,7 @@ export function JaapProvider({ children }: { children: ReactNode }) {
         estadoLabel: etiquetaEstado(estado),
         tagClass: claseEtiqueta(estado),
         editable: editandoAhora,
+        opciones: fila.opciones,
         onChange: (valor: string) => {
           setBorrador((actual) => {
             if (!actual) return actual;
@@ -141,42 +266,158 @@ export function JaapProvider({ children }: { children: ReactNode }) {
     [calidadPublicada, cantidadPublicada],
   );
   const totalParams = calidadPublicada.length + cantidadPublicada.length;
-  const estadoGeneral = cumplenCount === totalParams ? 'Todo en norma' : 'Con observaciones';
+  const estadoGeneral = totalParams > 0 && cumplenCount === totalParams ? 'Todo en norma' : 'Con observaciones';
 
   const iniciarEdicion = () => {
     setBorrador({ calidad: calidadPublicada.slice(), cantidad: cantidadPublicada.slice() });
     setEditando(true);
     setGuardado(false);
+    setErrorParametros(null);
   };
   const cancelarEdicion = () => {
     setEditando(false);
     setBorrador(null);
   };
   const publicar = () => {
-    if (borrador) {
-      setCalidadPublicada(borrador.calidad);
-      setCantidadPublicada(borrador.cantidad);
-    }
-    setEditando(false);
-    setGuardado(true);
-    setBorrador(null);
+    if (!borrador || !token) return;
+    setGuardandoParametros(true);
+    setErrorParametros(null);
+
+    const filasAEnviar = borrador.calidad.concat(borrador.cantidad).filter((fila) => fila.id);
+
+    Promise.all(
+      filasAEnviar.map((fila) => {
+        const estado = fila.valor.trim() === '' ? 'pendiente' : fila.estado;
+        return api.updateParametro(fila.id as string, { valor: fila.valor, estado }, token);
+      }),
+    )
+      .then(() => {
+        setCalidadPublicada(borrador.calidad);
+        setCantidadPublicada(borrador.cantidad);
+        setEditando(false);
+        setGuardado(true);
+        setBorrador(null);
+      })
+      .catch((err) => {
+        setErrorParametros(err instanceof ApiError ? err.message : 'No se pudieron publicar los cambios');
+      })
+      .finally(() => setGuardandoParametros(false));
+  };
+
+  const iniciarEdicionInfo = () => {
+    if (!informacionGeneral || !puedeEditarInfoGeneral) return;
+    setBorradorInfo({ ...informacionGeneral });
+    setEditandoInfo(true);
+    setGuardadoInfo(false);
+    setErrorInfo(null);
+  };
+  const cancelarEdicionInfo = () => {
+    setEditandoInfo(false);
+    setBorradorInfo(null);
+  };
+  const actualizarBorradorInfo = (campo: keyof InformacionGeneralData, valor: string | number) => {
+    setBorradorInfo((actual) => (actual ? { ...actual, [campo]: valor } : actual));
+  };
+  const publicarInfo = () => {
+    if (!borradorInfo || !token || !puedeEditarInfoGeneral) return;
+    setGuardandoInfo(true);
+    setErrorInfo(null);
+
+    const { id: _id, ...data } = borradorInfo;
+
+    api
+      .updateInformacionGeneral(data, token)
+      .then((actualizado) => {
+        setInformacionGeneral(actualizado);
+        setEditandoInfo(false);
+        setGuardadoInfo(true);
+        setBorradorInfo(null);
+      })
+      .catch((err) => {
+        setErrorInfo(err instanceof ApiError ? err.message : 'No se pudo publicar la información general');
+      })
+      .finally(() => setGuardandoInfo(false));
   };
 
   const consumoNum = Math.max(0, Number(consumo.replace(',', '.')) || 0);
-  const variablePart = consumoNum * cargoVariable;
-  const total = cargoFijo + variablePart;
+  const excedente = Math.max(0, consumoNum - umbralConsumo);
+  const variablePart = excedente * cargoVariable;
+  const subtotal = cargoFijo + variablePart;
+  const esAdultoMayor = (Number(edad) || 0) >= 65;
+  const descuento = esAdultoMayor ? subtotal * (descuentoAdultoMayorPct / 100) : 0;
+  const total = subtotal - descuento;
 
   const calcular = () => setCalculado(true);
   const limpiar = () => {
-    setCedula('');
+    setEdad('');
     setMedidor('');
     setConsumo('');
     setCalculado(false);
   };
 
+  const publicarTarifa = () => {
+    if (!token) return;
+    setGuardandoTarifa(true);
+    setErrorTarifa(null);
+    setGuardadoTarifa(false);
+
+    api
+      .updateTarifaConfig({ cargoFijo, cargoVariable, umbralConsumo }, token)
+      .then((config) => {
+        setCargoFijo(config.cargoFijo);
+        setCargoVariable(config.cargoVariable);
+        setUmbralConsumo(config.umbralConsumo);
+        setDescuentoAdultoMayorPct(config.descuentoAdultoMayorPct);
+        setGuardadoTarifa(true);
+      })
+      .catch((err) => {
+        setErrorTarifa(err instanceof ApiError ? err.message : 'No se pudo publicar la tarifa');
+      })
+      .finally(() => setGuardandoTarifa(false));
+  };
+
+  const costeo = editandoCosteo && borradorCosteo ? borradorCosteo : costeoPublicado;
+
+  const iniciarEdicionCosteo = () => {
+    if (!puedeEditarCosteo) return;
+    setBorradorCosteo(costeoPublicado.map((fila) => ({ ...fila })));
+    setEditandoCosteo(true);
+    setGuardadoCosteo(false);
+    setErrorCosteo(null);
+  };
+  const cancelarEdicionCosteo = () => {
+    setEditandoCosteo(false);
+    setBorradorCosteo(null);
+  };
+  const actualizarCosteoFila = (id: string, campo: 'cantidadAnual' | 'precioUnitario', valor: number | null) => {
+    setBorradorCosteo((actual) => actual?.map((fila) => (fila.id === id ? { ...fila, [campo]: valor } : fila)) ?? actual);
+  };
+  const publicarCosteo = () => {
+    if (!borradorCosteo || !token || !puedeEditarCosteo) return;
+    setGuardandoCosteo(true);
+    setErrorCosteo(null);
+
+    Promise.all(
+      borradorCosteo.map((fila) =>
+        api.updateCosteoComponente(fila.id, { cantidadAnual: fila.cantidadAnual, precioUnitario: fila.precioUnitario }, token),
+      ),
+    )
+      .then(() => {
+        setCosteoPublicado(borradorCosteo);
+        setEditandoCosteo(false);
+        setGuardadoCosteo(true);
+        setBorradorCosteo(null);
+      })
+      .catch((err) => {
+        setErrorCosteo(err instanceof ApiError ? err.message : 'No se pudo publicar el costeo del servicio');
+      })
+      .finally(() => setGuardandoCosteo(false));
+  };
+
   const value: JaapContextValue = {
     role,
-    isAdmin,
+    isStaff,
+    token,
     login,
     logout,
     calidad,
@@ -184,16 +425,29 @@ export function JaapProvider({ children }: { children: ReactNode }) {
     cumplenCount,
     totalParams,
     estadoGeneral,
-    editando: editando && isAdmin,
+    mesParametros,
+    editando: editando && isStaff,
     guardado,
+    guardandoParametros,
+    errorParametros,
     iniciarEdicion,
     cancelarEdicion,
     publicar,
-    cedula,
+    informacionGeneral,
+    editandoInfo: editandoInfo && puedeEditarInfoGeneral,
+    guardadoInfo,
+    guardandoInfo,
+    errorInfo,
+    borradorInfo,
+    iniciarEdicionInfo,
+    cancelarEdicionInfo,
+    actualizarBorradorInfo,
+    publicarInfo,
+    edad,
     medidor,
     consumo,
     calculado,
-    setCedula,
+    setEdad,
     setMedidor,
     setConsumo: (v) => {
       setConsumo(v);
@@ -203,11 +457,32 @@ export function JaapProvider({ children }: { children: ReactNode }) {
     limpiar,
     cargoFijo,
     cargoVariable,
+    umbralConsumo,
+    descuentoAdultoMayorPct,
     setCargoFijo,
     setCargoVariable,
+    setUmbralConsumo,
+    guardandoTarifa,
+    guardadoTarifa,
+    errorTarifa,
+    publicarTarifa,
     consumoNum,
+    excedente,
     variablePart,
+    esAdultoMayor,
+    subtotal,
+    descuento,
     total,
+    costeo,
+    puedeEditarCosteo,
+    editandoCosteo: editandoCosteo && puedeEditarCosteo,
+    guardandoCosteo,
+    guardadoCosteo,
+    errorCosteo,
+    iniciarEdicionCosteo,
+    cancelarEdicionCosteo,
+    actualizarCosteoFila,
+    publicarCosteo,
   };
 
   return <JaapContext.Provider value={value}>{children}</JaapContext.Provider>;

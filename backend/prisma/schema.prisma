@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  JUNTA
+  ENTIDAD_RECTORA
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  nombre       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model InformacionGeneral {
+  id                   String    @id @default(uuid())
+  familias             Int
+  habitantes           Int
+  localidadesAtendidas String
+  canton               String
+  provincia            String
+  zonaUtm              String
+  coordenadaEste       String
+  coordenadaSur        String
+  cota                 String
+  presidente           String
+  telefonoContacto     String
+  horarioAtencion      String
+  fotoUrl              String?   @db.Text
+  mapaUrl              String?   @db.Text
+  actualizadoPorId     String?
+  updatedAt            DateTime  @updatedAt
+}
+
+model ParametroMes {
+  id          String    @id @default(uuid())
+  mes         String
+  categoria   String
+  nombre      String
+  limite      String
+  valor       String
+  estado      String
+  publicadoEn DateTime?
+  creadoPorId String?
+
+  @@unique([mes, categoria, nombre])
+  @@index([mes])
+}
+
+model TarifaConfig {
+  id                      String   @id @default(uuid())
+  cargoFijo               Float
+  cargoVariable           Float
+  umbralConsumo           Float
+  descuentoAdultoMayorPct Float    @default(50)
+  vigenteDesde            DateTime @default(now())
+  actualizadoPorId        String?
+}
+
+model CosteoComponente {
+  id               String   @id @default(uuid())
+  orden            Int      @unique
+  componente       String
+  rubro            String
+  unidad           String
+  cantidadAnual    Float?
+  precioUnitario   Float?
+  actualizadoPorId String?
+  updatedAt        DateTime @updatedAt
+}
