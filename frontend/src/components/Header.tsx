@@ -15,7 +15,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-10 border-b border-divider bg-bg/90 backdrop-blur-sm">
-      <div className="h-[3px] w-full bg-gradient-to-r from-accent-600 via-accent-400 to-green-500" />
+      <div className="h-[3px] w-full bg-accent-600" />
       <div className="mx-auto flex w-full max-w-[1120px] flex-wrap items-center gap-4 px-[18px] py-3">
         <div className="mr-auto flex items-center gap-2.5">
           <img

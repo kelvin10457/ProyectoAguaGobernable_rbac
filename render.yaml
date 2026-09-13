@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: aguagobernable-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma migrate deploy && npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 8h
+      - key: CORS_ORIGIN
+        sync: false
+      - key: SEED_JUNTA_EMAIL
+        sync: false
+      - key: SEED_JUNTA_PASSWORD
+        sync: false
+      - key: SEED_ENTIDAD_RECTORA_EMAIL
+        sync: false
+      - key: SEED_ENTIDAD_RECTORA_PASSWORD
+        sync: false
