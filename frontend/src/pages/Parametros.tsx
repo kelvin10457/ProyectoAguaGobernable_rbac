@@ -62,7 +62,7 @@ function TablaParametros({ filas, titulo, nota, columnaLimite }: { filas: TablaF
 
 export default function Parametros() {
   const {
-    isStaff,
+    puedeEditarParametros,
     editando,
     guardado,
     guardandoParametros,
@@ -84,7 +84,7 @@ export default function Parametros() {
           </div>
           <h1 className="m-0 mb-1.5 text-[clamp(28px,4.4vw,42px)]">El agua que consumimos</h1>
           <p className="m-0 text-[13px] text-text/65">
-            {isStaff
+            {puedeEditarParametros
               ? 'Editas los valores del mes; al publicarlos se actualizan para las 525 familias.'
               : 'Valores publicados por la directiva. Vista de solo lectura.'}
           </p>
@@ -96,7 +96,7 @@ export default function Parametros() {
               <div className="input min-w-[150px] opacity-80">{mesParametros}</div>
             </div>
           )}
-          {isStaff && (
+          {puedeEditarParametros && (
             <div className="flex items-end gap-2 self-end">
               {editando ? (
                 <>

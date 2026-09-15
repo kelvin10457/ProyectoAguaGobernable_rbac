@@ -30,8 +30,79 @@ export const CAPACITACIONES: Capacitacion[] = [
     slug: 'protocolos-operativos',
     titulo: 'Protocolos operativos',
     tipo: 'video',
-    rolesAcceso: [],
+    rolesAcceso: ['JUNTA', 'ENTIDAD_RECTORA'],
     contenido: 'https://example.com/placeholder-video-protocolos-operativos',
+  },
+  {
+    slug: 'participacion-comunitaria',
+    titulo: 'Fortalecimiento de la participación comunitaria',
+    tipo: 'texto',
+    rolesAcceso: [],
+    contenido: {
+      indice: [
+        '¿Qué es la participación comunitaria?',
+        'Organización y liderazgo comunitario',
+        'Derechos y responsabilidades de la comunidad',
+        'Comunicación y resolución de conflictos',
+        'Participación en la toma de decisiones',
+        'Transparencia, control social y rendición de cuentas',
+        'Planificación y acción comunitaria',
+        'Bibliografía',
+        'Preguntas',
+      ],
+      secciones: [
+        {
+          titulo: '¿Qué es la participación comunitaria?',
+          parrafos: [
+            'La participación comunitaria es el proceso mediante el cual las personas que forman parte de una comunidad se involucran activamente en los asuntos que afectan su bienestar y calidad de vida.',
+            'Participar no significa únicamente asistir a una reunión. Implica opinar, proponer, escuchar, tomar decisiones, asumir responsabilidades, colaborar y realizar acciones para resolver necesidades comunes.',
+            'Una comunidad que participa activamente tiene mayores posibilidades de identificar adecuadamente sus problemas, plantear soluciones que respondan a sus necesidades y fortalecer la confianza entre sus miembros y sus organizaciones.',
+            'La participación puede entenderse como formar parte de algo y contribuir activamente a su desarrollo.',
+          ],
+          destacado:
+            'Una comunidad se fortalece cuando sus miembros dejan de ser únicamente beneficiarios y se convierten en actores de las decisiones y soluciones.',
+          subtitulo: 'En una comunidad, participar significa:',
+          lista: [
+            { texto: 'Expresar opiniones y necesidades.' },
+            { texto: 'Escuchar las opiniones de los demás.' },
+            { texto: 'Asistir a reuniones y asambleas.' },
+            { texto: 'Proponer soluciones.' },
+            { texto: 'Participar en la toma de decisiones.' },
+            { texto: 'Cumplir los acuerdos establecidos.' },
+            { texto: 'Colaborar en actividades comunitarias.' },
+            { texto: 'Vigilar que los recursos sean utilizados adecuadamente.' },
+            { texto: 'Apoyar las iniciativas que beneficien a la comunidad.' },
+            { texto: 'Asumir responsabilidades.' },
+          ],
+        },
+        {
+          titulo: 'Elementos fundamentales de la participación comunitaria',
+          parrafos: [
+            'La participación comunitaria es un proceso colectivo mediante el cual los habitantes de una comunidad intervienen en la identificación de sus necesidades, la planificación, la toma de decisiones, la ejecución de acciones y la evaluación de los resultados. Tiene como elementos fundamentales:',
+          ],
+          lista: [
+            { fuerte: 'Opinión', texto: 'La comunidad tiene la posibilidad de expresar sus ideas, necesidades y propuestas.' },
+            {
+              fuerte: 'Colaboración',
+              texto: 'Las personas aportan tiempo, conocimientos, capacidades o recursos para alcanzar objetivos comunes.',
+            },
+            {
+              fuerte: 'Toma de decisiones',
+              texto: 'Los miembros de la comunidad participan en las decisiones que afectan su bienestar.',
+            },
+            {
+              fuerte: 'Organización',
+              texto: 'Las personas trabajan de manera coordinada para alcanzar objetivos colectivos.',
+            },
+            { fuerte: 'Seguimiento', texto: 'La comunidad verifica que las decisiones y acuerdos se cumplan.' },
+          ],
+        },
+        {
+          titulo: 'Bibliografía',
+          lista: [{ texto: 'La participación comunitaria en la prestación de los servicios públicos (documento pdf).' }],
+        },
+      ],
+    },
   },
   {
     slug: 'costos-servicio',

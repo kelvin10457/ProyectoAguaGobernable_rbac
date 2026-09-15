@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { to: '/informacion-general', label: 'Información general', end: false },
   { to: '/fortalecimiento', label: 'Fortalecimiento', end: false },
   { to: '/parametros', label: 'Parámetros', end: false },
+  { to: '/costeo', label: 'Costeo', end: false },
   { to: '/tarifa', label: 'Tarifa', end: false },
 ];
 

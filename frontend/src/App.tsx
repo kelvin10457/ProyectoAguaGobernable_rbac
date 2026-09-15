@@ -6,6 +6,7 @@ import InformacionGeneral from './pages/InformacionGeneral';
 import Fortalecimiento from './pages/Fortalecimiento';
 import FortalecimientoDetalle from './pages/FortalecimientoDetalle';
 import Parametros from './pages/Parametros';
+import Costeo from './pages/Costeo';
 import Tarifa from './pages/Tarifa';
 import Login from './pages/Login';
 
@@ -23,6 +24,7 @@ export default function App() {
             <Route path="/fortalecimiento" element={<Fortalecimiento />} />
             <Route path="/fortalecimiento/:slug" element={<FortalecimientoDetalle />} />
             <Route path="/parametros" element={<Parametros />} />
+            <Route path="/costeo" element={<Costeo />} />
             <Route path="/tarifa" element={<Tarifa />} />
             <Route path="/ingreso" element={<Login />} />
           </Routes>

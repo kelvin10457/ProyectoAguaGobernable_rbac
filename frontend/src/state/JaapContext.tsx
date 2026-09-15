@@ -53,6 +53,7 @@ interface JaapContextValue {
   totalParams: number;
   estadoGeneral: string;
   mesParametros: string | null;
+  puedeEditarParametros: boolean;
 
   editando: boolean;
   guardado: boolean;
@@ -135,6 +136,7 @@ export function JaapProvider({ children }: { children: ReactNode }) {
   const isStaff = role !== 'usuario';
   const puedeEditarInfoGeneral = role === 'junta';
   const puedeEditarCosteo = role === 'junta';
+  const puedeEditarParametros = role === 'junta';
   const token = auth?.token ?? null;
 
   const [mesParametros, setMesParametros] = useState<string | null>(null);
@@ -229,7 +231,7 @@ export function JaapProvider({ children }: { children: ReactNode }) {
   };
 
   function filas(clave: 'calidad' | 'cantidad'): TablaFila[] {
-    const editandoAhora = editando && isStaff;
+    const editandoAhora = editando && puedeEditarParametros;
     const publicadas = clave === 'calidad' ? calidadPublicada : cantidadPublicada;
     const fuente = editandoAhora && borrador ? borrador[clave] : publicadas;
 
@@ -269,6 +271,7 @@ export function JaapProvider({ children }: { children: ReactNode }) {
   const estadoGeneral = totalParams > 0 && cumplenCount === totalParams ? 'Todo en norma' : 'Con observaciones';
 
   const iniciarEdicion = () => {
+    if (!puedeEditarParametros) return;
     setBorrador({ calidad: calidadPublicada.slice(), cantidad: cantidadPublicada.slice() });
     setEditando(true);
     setGuardado(false);
@@ -426,7 +429,8 @@ export function JaapProvider({ children }: { children: ReactNode }) {
     totalParams,
     estadoGeneral,
     mesParametros,
-    editando: editando && isStaff,
+    puedeEditarParametros,
+    editando: editando && puedeEditarParametros,
     guardado,
     guardandoParametros,
     errorParametros,

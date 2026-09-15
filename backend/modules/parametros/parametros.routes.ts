@@ -16,7 +16,7 @@ parametrosRouter.get('/', async (req, res) => {
   res.json(parametros.map((p: (typeof parametros)[number]) => ({ ...p, opciones: buscarEnCatalogo(p.nombre)?.opciones })));
 });
 
-parametrosRouter.post('/', requireAuth, requireRole('JUNTA', 'ENTIDAD_RECTORA'), async (req, res) => {
+parametrosRouter.post('/', requireAuth, requireRole('JUNTA'), async (req, res) => {
   const { mes } = req.body ?? {};
   if (typeof mes !== 'string' || !mes) {
     return res.status(400).json({ error: 'mes es requerido, ej. "2026-09"' });
@@ -46,7 +46,7 @@ parametrosRouter.post('/', requireAuth, requireRole('JUNTA', 'ENTIDAD_RECTORA'),
   res.status(201).json(filas);
 });
 
-parametrosRouter.put('/:id', requireAuth, requireRole('JUNTA', 'ENTIDAD_RECTORA'), async (req, res) => {
+parametrosRouter.put('/:id', requireAuth, requireRole('JUNTA'), async (req, res) => {
   const { id } = req.params as { id: string };
   const { valor, estado } = req.body ?? {};
 
