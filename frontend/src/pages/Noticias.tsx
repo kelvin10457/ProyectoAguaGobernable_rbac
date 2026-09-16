@@ -218,7 +218,7 @@ export default function Noticias() {
       )}
 
       {noticias && noticias.length > 0 && (
-        <div className="stagger mt-[26px] grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-[22px]">
+        <div className="stagger mt-[26px] grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] items-start gap-[22px]">
           {noticias.map((n) =>
             editandoId === n.id ? (
               <Blueprint key={n.id} className="p-[18px]">
@@ -274,7 +274,7 @@ export default function Noticias() {
                 </div>
               </Blueprint>
             ) : (
-              <Blueprint key={n.id} className="card">
+              <Blueprint key={n.id} className="card overflow-hidden">
                 {n.imagenesUrl[0] && (
                   <img
                     src={n.imagenesUrl[0]}
