@@ -75,8 +75,19 @@ export interface ContenidoTexto {
 }
 
 export type CapacitacionDetalle =
-  | { slug: string; titulo: string; tipo: 'video'; contenido: string }
-  | { slug: string; titulo: string; tipo: 'texto'; contenido: ContenidoTexto };
+  | { slug: string; titulo: string; tipo: 'video'; contenido: string; videoUrl?: string }
+  | { slug: string; titulo: string; tipo: 'texto'; contenido: ContenidoTexto; videoUrl?: string };
+
+export interface NoticiaData {
+  id: string;
+  titulo: string;
+  resumen: string | null;
+  contenido: string;
+  imagenesUrl: string[];
+  videosUrl: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface AuthUser {
   id: string;

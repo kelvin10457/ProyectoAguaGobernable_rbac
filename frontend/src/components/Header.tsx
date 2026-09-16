@@ -3,6 +3,7 @@ import { useJaap } from '../state/JaapContext';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Inicio', end: true },
+  { to: '/noticias', label: 'Noticias', end: false },
   { to: '/informacion-general', label: 'Información general', end: false },
   { to: '/fortalecimiento', label: 'Fortalecimiento', end: false },
   { to: '/parametros', label: 'Parámetros', end: false },

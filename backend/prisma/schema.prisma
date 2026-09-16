@@ -78,3 +78,18 @@ model CosteoComponente {
   actualizadoPorId String?
   updatedAt        DateTime @updatedAt
 }
+
+model Noticia {
+  id               String   @id @default(uuid())
+  titulo           String
+  resumen          String?
+  contenido        String   @db.Text
+  imagenesUrl      String[] @default([])
+  videosUrl        String[] @default([])
+  creadoPorId      String?
+  actualizadoPorId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([createdAt])
+}

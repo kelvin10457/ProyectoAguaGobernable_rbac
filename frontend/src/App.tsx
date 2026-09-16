@@ -2,6 +2,8 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Inicio from './pages/Inicio';
+import Noticias from './pages/Noticias';
+import NoticiaDetalle from './pages/NoticiaDetalle';
 import InformacionGeneral from './pages/InformacionGeneral';
 import Fortalecimiento from './pages/Fortalecimiento';
 import FortalecimientoDetalle from './pages/FortalecimientoDetalle';
@@ -20,6 +22,8 @@ export default function App() {
         <div key={location.pathname} className="animate-fade-in-up">
           <Routes location={location}>
             <Route path="/" element={<Inicio />} />
+            <Route path="/noticias" element={<Noticias />} />
+            <Route path="/noticias/:id" element={<NoticiaDetalle />} />
             <Route path="/informacion-general" element={<InformacionGeneral />} />
             <Route path="/fortalecimiento" element={<Fortalecimiento />} />
             <Route path="/fortalecimiento/:slug" element={<FortalecimientoDetalle />} />

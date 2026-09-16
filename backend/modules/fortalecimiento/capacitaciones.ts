@@ -23,6 +23,8 @@ export interface Capacitacion {
   /** Roles con acceso; arreglo vacío = pública (visible incluso sin login). */
   rolesAcceso: Role[];
   contenido: string | ContenidoTexto;
+  /** Link de YouTube o Vimeo para embeber junto al contenido (opcional). */
+  videoUrl?: string;
 }
 
 export const CAPACITACIONES: Capacitacion[] = [
@@ -38,6 +40,7 @@ export const CAPACITACIONES: Capacitacion[] = [
     titulo: 'Fortalecimiento de la participación comunitaria',
     tipo: 'texto',
     rolesAcceso: [],
+    videoUrl: 'https://youtube.com/shorts/0xCchsEPols',
     contenido: {
       indice: [
         '¿Qué es la participación comunitaria?',

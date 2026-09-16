@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import Blueprint from '../components/Blueprint';
 import { useJaap } from '../state/JaapContext';
 import { api, ApiError } from '../lib/api';
+import { obtenerEmbedVideo } from '../lib/video';
 import type { CapacitacionDetalle, ContenidoTexto, SeccionTexto } from '../types';
 
 function Seccion({ seccion }: { seccion: SeccionTexto }) {
@@ -148,6 +149,19 @@ export default function FortalecimientoDetalle() {
         ← Fortalecimiento
       </Link>
       <h1 className="m-0 mt-1.5 mb-5 text-[clamp(28px,4.4vw,42px)]">{capacitacion.titulo}</h1>
+
+      {capacitacion.videoUrl && (
+        <Blueprint as="figure" className="m-0 mb-[26px] max-w-[640px] overflow-hidden">
+          <iframe
+            src={obtenerEmbedVideo(capacitacion.videoUrl)}
+            className="aspect-video w-full border-0"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title={capacitacion.titulo}
+          />
+        </Blueprint>
+      )}
 
       {capacitacion.tipo === 'video' ? (
         <Blueprint as="figure" className="m-0 max-w-[640px] overflow-hidden">

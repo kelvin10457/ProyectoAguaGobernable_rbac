@@ -4,6 +4,7 @@ import type {
   CapacitacionResumen,
   CosteoComponenteData,
   InformacionGeneralData,
+  NoticiaData,
   ParametroRow,
   TarifaConfigData,
 } from '../types';
@@ -111,4 +112,22 @@ export const api = {
 
   updateCosteoComponente: (id: string, data: { cantidadAnual: number | null; precioUnitario: number | null }, token: string) =>
     request<CosteoComponenteData>(`/costeo/${id}`, { method: 'PUT', body: JSON.stringify(data) }, token),
+
+  getNoticias: () => request<NoticiaData[]>('/noticias'),
+
+  getNoticia: (id: string) => request<NoticiaData>(`/noticias/${id}`),
+
+  createNoticia: (
+    data: { titulo: string; resumen: string; contenido: string; imagenesUrl: string[]; videosUrl: string[] },
+    token: string,
+  ) => request<NoticiaData>('/noticias', { method: 'POST', body: JSON.stringify(data) }, token),
+
+  updateNoticia: (
+    id: string,
+    data: { titulo: string; resumen: string; contenido: string; imagenesUrl: string[]; videosUrl: string[] },
+    token: string,
+  ) => request<NoticiaData>(`/noticias/${id}`, { method: 'PUT', body: JSON.stringify(data) }, token),
+
+  deleteNoticia: (id: string, token: string) =>
+    request<void>(`/noticias/${id}`, { method: 'DELETE' }, token),
 };
