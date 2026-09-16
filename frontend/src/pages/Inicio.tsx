@@ -3,7 +3,8 @@ import Blueprint from '../components/Blueprint';
 import { useJaap } from '../state/JaapContext';
 
 export default function Inicio() {
-  const { isStaff, cumplenCount, totalParams, estadoGeneral, cargoFijo, cargoVariable } = useJaap();
+  const { role, cumplenCount, totalParams, estadoGeneral, cargoFijo, cargoVariable } = useJaap();
+  const esJunta = role === 'junta';
 
   return (
     <section>
@@ -73,7 +74,7 @@ export default function Inicio() {
         </Blueprint>
       </div>
 
-      {isStaff && (
+      {esJunta && (
         <div className="mt-8">
           <h4 className="mb-3">Pendientes de la directiva</h4>
           <Blueprint className="divide-y divide-divider overflow-hidden">
