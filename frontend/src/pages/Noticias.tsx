@@ -274,30 +274,32 @@ export default function Noticias() {
                 </div>
               </Blueprint>
             ) : (
-              <Blueprint key={n.id} className="card overflow-hidden">
+              <Blueprint key={n.id} className="card overflow-hidden p-0">
                 {n.imagenesUrl[0] && (
                   <img
                     src={n.imagenesUrl[0]}
                     alt={n.titulo}
-                    className="-mx-[18px] -mt-[18px] mb-1 aspect-[16/9] w-[calc(100%+36px)] object-cover"
+                    className="aspect-[16/9] w-full object-cover"
                   />
                 )}
-                <div className="card-kicker">{formatearFecha(n.createdAt)}</div>
-                <div className="card-title">{n.titulo}</div>
-                {n.resumen && <p className="card-body">{n.resumen}</p>}
-                <Link to={`/noticias/${n.id}`} className="btn btn-secondary btn-block mt-2">
-                  Leer más
-                </Link>
-                {puedeEditar && (
-                  <div className="mt-1.5 flex gap-2">
-                    <button type="button" className="btn btn-ghost" onClick={() => iniciarEdicion(n)}>
-                      Editar
-                    </button>
-                    <button type="button" className="btn btn-ghost text-red-600" onClick={() => eliminarNoticia(n.id)}>
-                      Eliminar
-                    </button>
-                  </div>
-                )}
+                <div className="flex flex-1 flex-col gap-[7px] p-[18px]">
+                  <div className="card-kicker">{formatearFecha(n.createdAt)}</div>
+                  <div className="card-title">{n.titulo}</div>
+                  {n.resumen && <p className="card-body">{n.resumen}</p>}
+                  <Link to={`/noticias/${n.id}`} className="btn btn-secondary btn-block mt-2">
+                    Leer más
+                  </Link>
+                  {puedeEditar && (
+                    <div className="mt-1.5 flex gap-2">
+                      <button type="button" className="btn btn-ghost" onClick={() => iniciarEdicion(n)}>
+                        Editar
+                      </button>
+                      <button type="button" className="btn btn-ghost text-red-600" onClick={() => eliminarNoticia(n.id)}>
+                        Eliminar
+                      </button>
+                    </div>
+                  )}
+                </div>
               </Blueprint>
             ),
           )}
