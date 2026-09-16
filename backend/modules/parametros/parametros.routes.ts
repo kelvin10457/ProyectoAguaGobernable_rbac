@@ -19,12 +19,12 @@ parametrosRouter.get('/', async (req, res) => {
 parametrosRouter.post('/', requireAuth, requireRole('JUNTA'), async (req, res) => {
   const { mes } = req.body ?? {};
   if (typeof mes !== 'string' || !mes) {
-    return res.status(400).json({ error: 'mes es requerido, ej. "2026-09"' });
+    return res.status(400).json({ error: 'mes es requerido, ej. "2026-III" (trimestre)' });
   }
 
   const yaExiste = await prisma.parametroMes.findFirst({ where: { mes } });
   if (yaExiste) {
-    return res.status(409).json({ error: `Ya existen parámetros registrados para el mes ${mes}` });
+    return res.status(409).json({ error: `Ya existen parámetros registrados para el trimestre ${mes}` });
   }
 
   const filas = await prisma.$transaction(

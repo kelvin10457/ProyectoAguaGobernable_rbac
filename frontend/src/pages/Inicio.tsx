@@ -31,7 +31,7 @@ export default function Inicio() {
 
       <div className="stagger grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] gap-[22px]">
         <Blueprint className="card">
-          <div className="card-title">Calidad del mes agosto 2026</div>
+          <div className="card-title">Calidad del trimestre 2026-III</div>
           <div className="my-1 flex items-baseline gap-2.5">
             <span className="font-heading text-[34px] leading-none">
               {cumplenCount}/{totalParams}
@@ -63,12 +63,12 @@ export default function Inicio() {
         </Blueprint>
 
         <Blueprint className="card">
-          <div className="card-title">Capacitación del mes</div>
+          <div className="card-title">Fortalecimiento de capacidades</div>
           <p className="card-body">
-            Protocolos operativos y controles internos: un video corto de 6 minutos para operadores y directiva.
+            Capacitaciones y protocolos operativos para operadores y directiva.
           </p>
           <Link to="/fortalecimiento" className="btn btn-secondary btn-block">
-            Ver capacitación
+            Ver capacitaciones
           </Link>
         </Blueprint>
       </div>
@@ -80,8 +80,8 @@ export default function Inicio() {
             <div className="flex flex-wrap items-center gap-3 px-4 py-3.5">
               <span className="tag tag-outline shrink-0">Por registrar</span>
               <div className="min-w-0 flex-1">
-                <div className="font-heading text-[15px]">Retroalimentación mensual de parámetros</div>
-                <p className="m-0 text-[13px] opacity-70">Mes septiembre 2026 — pendiente de cargar las mediciones.</p>
+                <div className="font-heading text-[15px]">Retroalimentación trimestral de parámetros</div>
+                <p className="m-0 text-[13px] opacity-70">Trimestre 2026-III — pendiente de cargar las mediciones.</p>
               </div>
               <Link to="/parametros" className="btn btn-secondary shrink-0">
                 Registrar

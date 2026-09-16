@@ -78,7 +78,8 @@ const VALORES_INICIALES: Record<string, { valor: string; estado: string }> = {
 };
 
 async function seedParametros() {
-  const mes = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  // Medición trimestral (recomendación EPA): formato "YYYY-<I|II|III|IV>"
+  const mes = '2026-III';
   const existente = await prisma.parametroMes.findFirst({ where: { mes } });
   if (existente) return;
 
@@ -98,7 +99,7 @@ async function seedParametros() {
       });
     }),
   );
-  console.log(`Parámetros iniciales creados para el mes ${mes}`);
+  console.log(`Parámetros iniciales creados para el trimestre ${mes}`);
 }
 
 async function seedCosteo() {
