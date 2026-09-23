@@ -245,6 +245,20 @@ export default function InformacionGeneral() {
                   <a href={`tel:${datos.telefonoContacto.replace(/\s/g, '')}`}>{datos.telefonoContacto}</a>
                 )}
               </dd>
+              <dt className="opacity-60">Teléfono de la junta</dt>
+              <dd className="m-0">
+                {editandoInfo ? (
+                  <input
+                    className="input"
+                    value={datos.telefonoJunta}
+                    onChange={(e) => actualizarBorradorInfo('telefonoJunta', e.target.value)}
+                  />
+                ) : datos.telefonoJunta ? (
+                  <a href={`tel:${datos.telefonoJunta.replace(/\s/g, '')}`}>{datos.telefonoJunta}</a>
+                ) : (
+                  '—'
+                )}
+              </dd>
               <dt className="opacity-60">Atención</dt>
               <dd className="m-0">
                 {editandoInfo ? (

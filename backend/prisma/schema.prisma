@@ -35,6 +35,7 @@ model InformacionGeneral {
   cota                 String
   presidente           String
   telefonoContacto     String
+  telefonoJunta        String    @default("")
   horarioAtencion      String
   fotoUrl              String?   @db.Text
   mapaUrl              String?   @db.Text

@@ -51,7 +51,8 @@ async function seedInformacionGeneral() {
       cota: '74 m.s.n.m.',
       presidente: 'Alberto Montoya Zamora',
       telefonoContacto: '098 896 0736',
-      horarioAtencion: 'Lun a vie, 08:00–13:00',
+      telefonoJunta: '098 186 4718',
+      horarioAtencion: '08h00-12h00 y 13h30-16h30',
     },
   });
   console.log('Información general inicial creada');

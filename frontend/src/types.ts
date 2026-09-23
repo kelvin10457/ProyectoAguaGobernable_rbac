@@ -30,6 +30,7 @@ export interface InformacionGeneralData {
   cota: string;
   presidente: string;
   telefonoContacto: string;
+  telefonoJunta: string;
   horarioAtencion: string;
   fotoUrl: string | null;
   mapaUrl: string | null;

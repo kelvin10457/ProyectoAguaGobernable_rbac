@@ -16,6 +16,7 @@ const CAMPOS_EDITABLES = [
   'cota',
   'presidente',
   'telefonoContacto',
+  'telefonoJunta',
   'horarioAtencion',
   'fotoUrl',
   'mapaUrl',
