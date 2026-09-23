@@ -24,7 +24,7 @@ parametrosRouter.post('/', requireAuth, requireRole('JUNTA'), async (req, res) =
 
   const yaExiste = await prisma.parametroMes.findFirst({ where: { mes } });
   if (yaExiste) {
-    return res.status(409).json({ error: `Ya existen parámetros registrados para el mes ${mes}` });
+    return res.status(409).json({ error: `Ya existen parámetros registrados para el semestre ${mes}` });
   }
 
   const filas = await prisma.$transaction(

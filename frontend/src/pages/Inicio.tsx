@@ -4,7 +4,6 @@ import { useJaap } from '../state/JaapContext';
 
 export default function Inicio() {
   const {
-    isStaff,
     role,
     cumplenCount,
     totalParams,
@@ -23,7 +22,7 @@ export default function Inicio() {
     publicarInfo,
   } = useJaap();
 
-  const puedeEditar = role === 'junta';
+  const esJunta = role === 'junta';
   const datos = editandoInfo && borradorInfo ? borradorInfo : informacionGeneral;
 
   const familias = datos?.familias;
@@ -34,7 +33,7 @@ export default function Inicio() {
   return (
     <section>
       <div className="relative mb-8 overflow-hidden rounded-[28px] bg-accent-700 px-6 py-10 text-white shadow-lg sm:px-10">
-        {puedeEditar && (
+        {esJunta && (
           <div className="mb-4 flex flex-wrap justify-end gap-2">
             {editandoInfo ? (
               <>
@@ -142,17 +141,17 @@ export default function Inicio() {
         </Blueprint>
 
         <Blueprint className="card">
-          <div className="card-title">Capacitación del mes</div>
+          <div className="card-title">Fortalecimiento de capacidades</div>
           <p className="card-body">
-            Protocolos operativos y controles internos: un video corto de 6 minutos para operadores y directiva.
+            Capacitaciones y protocolos operativos para operadores y directiva.
           </p>
           <Link to="/fortalecimiento" className="btn btn-secondary btn-block">
-            Ver capacitación
+            Ver capacitaciones
           </Link>
         </Blueprint>
       </div>
 
-      {isStaff && (
+      {esJunta && (
         <div className="mt-8">
           <h4 className="mb-3">Pendientes de la directiva</h4>
           <Blueprint className="divide-y divide-divider overflow-hidden">

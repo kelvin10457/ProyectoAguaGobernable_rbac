@@ -99,7 +99,7 @@ async function seedParametros() {
       });
     }),
   );
-  console.log(`Parámetros iniciales creados para el mes ${mes}`);
+  console.log(`Parámetros iniciales creados para el semestre ${mes}`);
 }
 
 async function seedCosteo() {

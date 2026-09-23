@@ -80,12 +80,12 @@ export default function Parametros() {
       <div className="mb-[22px] flex flex-wrap items-end gap-4">
         <div className="min-w-0 flex-1 basis-[300px]">
           <div className="mb-1.5 text-[11px] uppercase tracking-[0.12em] text-accent-700">
-            Parámetros · retroalimentación mensual
+            Parámetros · retroalimentación semestral
           </div>
           <h1 className="m-0 mb-1.5 text-[clamp(28px,4.4vw,42px)]">El agua que consumimos</h1>
           <p className="m-0 text-[13px] text-text/65">
             {puedeEditarParametros
-              ? 'Editas los valores del mes; al publicarlos se actualizan para las 525 familias.'
+              ? 'Editas los valores del semestre; al publicarlos se actualizan para las 525 familias.'
               : 'Valores publicados por la directiva. Vista de solo lectura.'}
           </p>
         </div>
@@ -120,7 +120,7 @@ export default function Parametros() {
       {guardado && (
         <Blueprint className="mb-[18px] flex animate-pop-in items-center gap-2.5 border-green bg-green-100/40 px-3.5 py-2.5">
           <span className="tag tag-green">Publicado</span>
-          <span className="text-[13px]">Los usuarios ya ven los valores actualizados del mes.</span>
+          <span className="text-[13px]">Los usuarios ya ven los valores actualizados del semestre.</span>
         </Blueprint>
       )}
       {errorParametros && (
@@ -144,7 +144,7 @@ export default function Parametros() {
 
       <p className="mt-[18px] text-xs opacity-55">
         Fuente de los límites: normativa nacional de agua para consumo humano. Registro a cargo de la directiva y el
-        operador.
+        operador. Medición semestral para sistemas comunitarios pequeños.
       </p>
     </section>
   );
