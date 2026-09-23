@@ -92,7 +92,7 @@ export default function Parametros() {
         <div className="flex flex-wrap items-center gap-2.5">
           {mesParametros && (
             <div className="field">
-              <label>Mes</label>
+              <label>Semestre</label>
               <div className="input min-w-[150px] opacity-80">{mesParametros}</div>
             </div>
           )}

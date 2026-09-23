@@ -19,7 +19,7 @@ parametrosRouter.get('/', async (req, res) => {
 parametrosRouter.post('/', requireAuth, requireRole('JUNTA'), async (req, res) => {
   const { mes } = req.body ?? {};
   if (typeof mes !== 'string' || !mes) {
-    return res.status(400).json({ error: 'mes es requerido, ej. "2026-09"' });
+    return res.status(400).json({ error: 'mes es requerido, ej. "2026-I" (semestre)' });
   }
 
   const yaExiste = await prisma.parametroMes.findFirst({ where: { mes } });

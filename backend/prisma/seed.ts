@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
 import { CATALOGO_PARAMETROS } from '../shared/parametrosCatalogo';
 import { CATALOGO_COSTEO } from '../shared/costeoCatalogo';
+import { semestreActual } from '../shared/periodo';
 
 const prisma = new PrismaClient();
 
@@ -78,7 +79,7 @@ const VALORES_INICIALES: Record<string, { valor: string; estado: string }> = {
 };
 
 async function seedParametros() {
-  const mes = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  const mes = semestreActual(); // "YYYY-I" o "YYYY-II"
   const existente = await prisma.parametroMes.findFirst({ where: { mes } });
   if (existente) return;
 
