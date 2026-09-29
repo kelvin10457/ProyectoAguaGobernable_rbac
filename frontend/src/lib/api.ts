@@ -134,8 +134,9 @@ export const api = {
 
   getReportesDanos: () => request<ReporteDanoData[]>('/reportes-danos'),
 
-  createReporteDano: (data: { nombre: string; telefono: string; descripcion: string; imagenUrl: string }) =>
-    request<ReporteDanoData>('/reportes-danos', { method: 'POST', body: JSON.stringify(data) }),
+  createReporteDano: (
+    data: { nombre: string; cedula: string; medidor: string; telefono: string; descripcion: string; imagenUrl: string },
+  ) => request<ReporteDanoData>('/reportes-danos', { method: 'POST', body: JSON.stringify(data) }),
 
   deleteReporteDano: (id: string, token: string) =>
     request<void>(`/reportes-danos/${id}`, { method: 'DELETE' }, token),

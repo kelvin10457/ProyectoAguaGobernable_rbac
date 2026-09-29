@@ -98,6 +98,8 @@ model Noticia {
 model ReporteDano {
   id          String   @id @default(uuid())
   nombre      String
+  cedula      String?
+  medidor     String?
   telefono    String?
   descripcion String   @db.Text
   imagenUrl   String?  @db.Text

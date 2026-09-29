@@ -93,6 +93,8 @@ export interface NoticiaData {
 export interface ReporteDanoData {
   id: string;
   nombre: string;
+  cedula: string | null;
+  medidor: string | null;
   telefono: string | null;
   descripcion: string;
   imagenUrl: string | null;

@@ -4,7 +4,7 @@ import { useJaap } from '../state/JaapContext';
 import { api, ApiError } from '../lib/api';
 import type { ReporteDanoData } from '../types';
 
-const FORM_VACIO = { nombre: '', telefono: '', descripcion: '', imagenUrl: '' };
+const FORM_VACIO = { nombre: '', cedula: '', medidor: '', telefono: '', descripcion: '', imagenUrl: '' };
 type FormReporte = typeof FORM_VACIO;
 
 function formatearFecha(iso: string): string {
@@ -87,6 +87,18 @@ export default function ReportesDanos() {
           />
           <input
             className="input"
+            placeholder="Cédula (opcional)"
+            value={form.cedula}
+            onChange={(e) => setForm({ ...form, cedula: e.target.value })}
+          />
+          <input
+            className="input"
+            placeholder="Número de medidor (opcional)"
+            value={form.medidor}
+            onChange={(e) => setForm({ ...form, medidor: e.target.value })}
+          />
+          <input
+            className="input"
             placeholder="Teléfono (opcional)"
             value={form.telefono}
             onChange={(e) => setForm({ ...form, telefono: e.target.value })}
@@ -133,7 +145,13 @@ export default function ReportesDanos() {
                 <div className="card-kicker">{formatearFecha(r.createdAt)}</div>
                 <div className="card-title">{r.nombre}</div>
                 <p className="card-body">{r.descripcion}</p>
-                {r.telefono && <p className="m-0 text-[12px] opacity-60">Tel: {r.telefono}</p>}
+                {(r.cedula || r.medidor || r.telefono) && (
+                  <p className="m-0 text-[12px] opacity-60">
+                    {[r.cedula && `Cédula: ${r.cedula}`, r.medidor && `Medidor: ${r.medidor}`, r.telefono && `Tel: ${r.telefono}`]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                )}
                 {esJunta && (
                   <button
                     type="button"

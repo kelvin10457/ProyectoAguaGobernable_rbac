@@ -9,9 +9,13 @@ reportesDanosRouter.get('/', async (_req, res) => {
   res.json(reportes);
 });
 
+function textoOpcional(valor: unknown): string | null {
+  return typeof valor === 'string' && valor.trim() ? valor.trim() : null;
+}
+
 reportesDanosRouter.post('/', async (req, res) => {
   const body = req.body ?? {};
-  const { nombre, telefono, descripcion, imagenUrl } = body;
+  const { nombre, cedula, medidor, telefono, descripcion, imagenUrl } = body;
 
   if (typeof nombre !== 'string' || !nombre.trim() || typeof descripcion !== 'string' || !descripcion.trim()) {
     return res.status(400).json({ error: 'El nombre y la descripción del daño son obligatorios' });
@@ -20,9 +24,11 @@ reportesDanosRouter.post('/', async (req, res) => {
   const creado = await prisma.reporteDano.create({
     data: {
       nombre: nombre.trim(),
-      telefono: typeof telefono === 'string' && telefono.trim() ? telefono.trim() : null,
+      cedula: textoOpcional(cedula),
+      medidor: textoOpcional(medidor),
+      telefono: textoOpcional(telefono),
       descripcion: descripcion.trim(),
-      imagenUrl: typeof imagenUrl === 'string' && imagenUrl.trim() ? imagenUrl.trim() : null,
+      imagenUrl: textoOpcional(imagenUrl),
     },
   });
 
