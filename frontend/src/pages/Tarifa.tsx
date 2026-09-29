@@ -94,13 +94,14 @@ export default function Tarifa() {
             <span className="font-mono">${variablePart.toFixed(2)}</span>
             {esAdultoMayor && (
               <>
-                <span className="opacity-75">Descuento adulto mayor ({descuentoAdultoMayorPct}%)</span>
+                <span className="opacity-75">Descuento adulto mayor ({descuentoAdultoMayorPct}% de la tarifa fija)</span>
                 <span className="font-mono">-${descuento.toFixed(2)}</span>
               </>
             )}
           </div>
           <div className="mt-1.5 font-mono text-[11px] leading-[1.6] opacity-60">
-            Tarifa mensual = tarifa fija + (excedente × cargo variable){esAdultoMayor && ' − 50% adulto mayor'}
+            Tarifa mensual = tarifa fija + (excedente × cargo variable)
+            {esAdultoMayor && ` − ${descuentoAdultoMayorPct}% de la tarifa fija (adulto mayor)`}
           </div>
           <div className="text-xs opacity-70">{medidorTexto}</div>
         </Blueprint>
@@ -148,7 +149,7 @@ export default function Tarifa() {
           <p className="mt-3.5 font-mono text-[11px] leading-[1.7] opacity-60">
             tarifa mensual = tarifa fija (hasta el consumo incluido) + (excedente × cargo por m³)
             <br />
-            descuento adulto mayor (edad ≥ 65) = {descuentoAdultoMayorPct}% sobre el total
+            descuento adulto mayor (edad ≥ 65) = {descuentoAdultoMayorPct}% sobre la tarifa fija, no sobre el total
           </p>
         </Blueprint>
       )}

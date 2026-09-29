@@ -90,6 +90,15 @@ export interface NoticiaData {
   updatedAt: string;
 }
 
+export interface ReporteDanoData {
+  id: string;
+  nombre: string;
+  telefono: string | null;
+  descripcion: string;
+  imagenUrl: string | null;
+  createdAt: string;
+}
+
 export interface AuthUser {
   id: string;
   email: string;

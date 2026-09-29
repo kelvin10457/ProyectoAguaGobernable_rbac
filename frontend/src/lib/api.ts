@@ -6,6 +6,7 @@ import type {
   InformacionGeneralData,
   NoticiaData,
   ParametroRow,
+  ReporteDanoData,
   TarifaConfigData,
 } from '../types';
 
@@ -130,4 +131,12 @@ export const api = {
 
   deleteNoticia: (id: string, token: string) =>
     request<void>(`/noticias/${id}`, { method: 'DELETE' }, token),
+
+  getReportesDanos: () => request<ReporteDanoData[]>('/reportes-danos'),
+
+  createReporteDano: (data: { nombre: string; telefono: string; descripcion: string; imagenUrl: string }) =>
+    request<ReporteDanoData>('/reportes-danos', { method: 'POST', body: JSON.stringify(data) }),
+
+  deleteReporteDano: (id: string, token: string) =>
+    request<void>(`/reportes-danos/${id}`, { method: 'DELETE' }, token),
 };

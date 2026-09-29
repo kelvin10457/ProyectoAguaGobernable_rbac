@@ -10,6 +10,7 @@ import FortalecimientoDetalle from './pages/FortalecimientoDetalle';
 import Parametros from './pages/Parametros';
 import Costeo from './pages/Costeo';
 import Tarifa from './pages/Tarifa';
+import ReportesDanos from './pages/ReportesDanos';
 import Login from './pages/Login';
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
             <Route path="/parametros" element={<Parametros />} />
             <Route path="/costeo" element={<Costeo />} />
             <Route path="/tarifa" element={<Tarifa />} />
+            <Route path="/reportes-danos" element={<ReportesDanos />} />
             <Route path="/ingreso" element={<Login />} />
           </Routes>
         </div>

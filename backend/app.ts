@@ -8,6 +8,7 @@ import { tarifaRouter } from './modules/tarifa/tarifa.routes';
 import { fortalecimientoRouter } from './modules/fortalecimiento/fortalecimiento.routes';
 import { costeoRouter } from './modules/costeo/costeo.routes';
 import { noticiasRouter } from './modules/noticias/noticias.routes';
+import { reportesDanosRouter } from './modules/reportes-danos/reportesDanos.routes';
 
 export const app = express();
 
@@ -23,6 +24,7 @@ app.use('/tarifa', tarifaRouter);
 app.use('/fortalecimiento', fortalecimientoRouter);
 app.use('/costeo', costeoRouter);
 app.use('/noticias', noticiasRouter);
+app.use('/reportes-danos', reportesDanosRouter);
 
 app.use((_req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });

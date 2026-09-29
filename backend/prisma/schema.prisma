@@ -94,3 +94,14 @@ model Noticia {
 
   @@index([createdAt])
 }
+
+model ReporteDano {
+  id          String   @id @default(uuid())
+  nombre      String
+  telefono    String?
+  descripcion String   @db.Text
+  imagenUrl   String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+}

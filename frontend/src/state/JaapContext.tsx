@@ -347,7 +347,7 @@ export function JaapProvider({ children }: { children: ReactNode }) {
   const variablePart = excedente * cargoVariable;
   const subtotal = cargoFijo + variablePart;
   const esAdultoMayor = (Number(edad) || 0) >= 65;
-  const descuento = esAdultoMayor ? subtotal * (descuentoAdultoMayorPct / 100) : 0;
+  const descuento = esAdultoMayor ? cargoFijo * (descuentoAdultoMayorPct / 100) : 0;
   const total = subtotal - descuento;
 
   const calcular = () => setCalculado(true);

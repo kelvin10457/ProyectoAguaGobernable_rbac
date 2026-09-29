@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/parametros', label: 'Parámetros', end: false },
   { to: '/costeo', label: 'Costeo', end: false },
   { to: '/tarifa', label: 'Tarifa', end: false },
+  { to: '/reportes-danos', label: 'Reportes de daños', end: false },
   { to: '/noticias', label: 'Noticias', end: false },
 ];
 
