@@ -10,6 +10,11 @@ function Seccion({ seccion }: { seccion: SeccionTexto }) {
   return (
     <div className="mb-8 last:mb-0">
       <h3 className="mb-2.5 font-heading text-[22px]">{seccion.titulo}</h3>
+      {seccion.imagen && (
+        <Blueprint as="figure" className="m-0 mb-3.5 max-w-[480px] overflow-hidden">
+          <img src={seccion.imagen.url} alt={seccion.imagen.alt ?? seccion.titulo} className="w-full object-cover" />
+        </Blueprint>
+      )}
       {seccion.parrafos?.map((p, i) => (
         <p key={i} className="mb-3 text-[15px] leading-relaxed text-text/85">
           {p}
@@ -149,6 +154,12 @@ export default function FortalecimientoDetalle() {
         ← Fortalecimiento
       </Link>
       <h1 className="m-0 mt-1.5 mb-5 text-[clamp(28px,4.4vw,42px)]">{capacitacion.titulo}</h1>
+
+      {capacitacion.imagenUrl && (
+        <Blueprint as="figure" className="m-0 mb-[26px] max-w-[640px] overflow-hidden">
+          <img src={capacitacion.imagenUrl} alt={capacitacion.titulo} className="aspect-[16/9] w-full object-cover" />
+        </Blueprint>
+      )}
 
       {capacitacion.videoUrl && (
         <Blueprint as="figure" className="m-0 mb-[26px] max-w-[640px] overflow-hidden">

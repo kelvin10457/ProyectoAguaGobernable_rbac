@@ -9,6 +9,7 @@ export interface SeccionTexto {
   subtitulo?: string;
   lista?: { fuerte?: string; texto: string }[];
   tabla?: { columnas: string[]; filas: string[][] };
+  imagen?: { url: string; alt?: string };
 }
 
 export interface ContenidoTexto {
@@ -25,6 +26,8 @@ export interface Capacitacion {
   contenido: string | ContenidoTexto;
   /** Link de YouTube o Vimeo para embeber junto al contenido (opcional). */
   videoUrl?: string;
+  /** Imagen de portada mostrada al inicio de la capacitación (opcional). */
+  imagenUrl?: string;
 }
 
 export const CAPACITACIONES: Capacitacion[] = [
@@ -112,6 +115,7 @@ export const CAPACITACIONES: Capacitacion[] = [
     titulo: 'El rol de la mujer en la gestión integral del agua',
     tipo: 'texto',
     rolesAcceso: [],
+    imagenUrl: '/fortalecimiento/rol-mujer-1.jpeg',
     contenido: {
       indice: [
         'Introducción: ¿por qué hablar de mujeres y agua?',
@@ -167,6 +171,10 @@ export const CAPACITACIONES: Capacitacion[] = [
         },
         {
           titulo: 'Gestión social del agua y perspectiva de género',
+          imagen: {
+            url: '/fortalecimiento/rol-mujer-2.jpeg',
+            alt: 'Mujeres reunidas en la Junta Administradora de Agua El Limón–Havoline',
+          },
           parrafos: [
             'Los análisis acerca del uso y gestión del agua han dado preferencia a los aspectos técnicos y han prestado insuficiente atención a los aspectos sociales. Por el contrario, muchas investigaciones recientes están poniendo de manifiesto que las mejoras en la gestión proceden de un enfoque adecuado de los aspectos sociales, con dos actuaciones fundamentales: priorizar la toma de decisiones a escala local e introducir la perspectiva de género (World Water Vision, 1999: 4). El enfoque social en la gestión del agua ha permitido comprobar que mucha de la infraestructura de abastecimiento de agua instalada durante los años ochenta ha fracasado, en buena medida porque los hombres habían asumido el protagonismo en la gestión de un recurso que no conocían adecuadamente, mientras las mujeres habían sido excluidas de la misma.',
             'La aplicación de una perspectiva de género a la gestión del agua está permitiendo considerables mejoras en su explotación, como se desprende de numerosas actuaciones llevadas a cabo en Malawi, Tanzania, Nepal o India (idem.).',
