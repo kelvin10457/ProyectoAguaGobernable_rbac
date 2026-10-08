@@ -108,6 +108,89 @@ export const CAPACITACIONES: Capacitacion[] = [
     },
   },
   {
+    slug: 'rol-mujer-gestion-agua',
+    titulo: 'El rol de la mujer en la gestión integral del agua',
+    tipo: 'texto',
+    rolesAcceso: [],
+    contenido: {
+      indice: [
+        'Introducción: ¿por qué hablar de mujeres y agua?',
+        'Participación en la toma de decisiones',
+        'Más que beneficiarias: agentes de cambio',
+        'Gestión social del agua y perspectiva de género',
+        'Actividad práctica',
+        'Bibliografía',
+        'Preguntas',
+      ],
+      secciones: [
+        {
+          titulo: 'Introducción: ¿por qué hablar de mujeres y agua?',
+          parrafos: [
+            'El agua está presente prácticamente en todas las dimensiones de la vida: alimentación, salud, higiene, producción agrícola, generación de ingresos, cuidado de los ecosistemas y desarrollo comunitario.',
+            'Sin embargo, mujeres y hombres no necesariamente tienen las mismas responsabilidades, oportunidades ni posibilidades de participar en las decisiones relacionadas con el agua.',
+          ],
+          subtitulo: 'En muchas comunidades, las mujeres tienen un conocimiento cotidiano muy importante sobre:',
+          lista: [
+            { texto: 'Disponibilidad y calidad del agua.' },
+            { texto: 'Necesidades de agua de los hogares.' },
+            { texto: 'Problemas de abastecimiento.' },
+            { texto: 'Higiene y salud.' },
+            { texto: 'Producción de alimentos.' },
+            { texto: 'Cuidado de animales.' },
+            { texto: 'Conservación de fuentes.' },
+            { texto: 'Impactos de sequías e inundaciones.' },
+            { texto: 'Necesidades de las familias y grupos vulnerables.' },
+          ],
+        },
+        {
+          titulo: 'Participación en la toma de decisiones',
+          parrafos: [
+            'Al mismo tiempo, las mujeres pueden estar subrepresentadas en los espacios donde se toman decisiones sobre:',
+          ],
+          lista: [
+            { texto: 'Distribución del agua.' },
+            { texto: 'Administración de sistemas de agua.' },
+            { texto: 'Inversiones.' },
+            { texto: 'Mantenimiento de infraestructura.' },
+            { texto: 'Planificación de cuencas.' },
+            { texto: 'Gestión de conflictos.' },
+            { texto: 'Formulación de políticas y proyectos.' },
+          ],
+        },
+        {
+          titulo: 'Más que beneficiarias: agentes de cambio',
+          parrafos: [
+            'Por eso, hablar del rol de la mujer en la gestión integral del agua no significa considerar a las mujeres únicamente como beneficiarias del recurso, sino reconocerlas como usuarias, gestoras, técnicas, productoras, lideresas, tomadoras de decisiones y agentes de cambio.',
+          ],
+          destacado:
+            'Según ONU Mujeres, la participación activa de las mujeres en los comités y juntas de agua mejora la eficiencia, el mantenimiento y la equidad de los sistemas de abastecimiento.',
+        },
+        {
+          titulo: 'Gestión social del agua y perspectiva de género',
+          parrafos: [
+            'Los análisis acerca del uso y gestión del agua han dado preferencia a los aspectos técnicos y han prestado insuficiente atención a los aspectos sociales. Por el contrario, muchas investigaciones recientes están poniendo de manifiesto que las mejoras en la gestión proceden de un enfoque adecuado de los aspectos sociales, con dos actuaciones fundamentales: priorizar la toma de decisiones a escala local e introducir la perspectiva de género (World Water Vision, 1999: 4). El enfoque social en la gestión del agua ha permitido comprobar que mucha de la infraestructura de abastecimiento de agua instalada durante los años ochenta ha fracasado, en buena medida porque los hombres habían asumido el protagonismo en la gestión de un recurso que no conocían adecuadamente, mientras las mujeres habían sido excluidas de la misma.',
+            'La aplicación de una perspectiva de género a la gestión del agua está permitiendo considerables mejoras en su explotación, como se desprende de numerosas actuaciones llevadas a cabo en Malawi, Tanzania, Nepal o India (idem.).',
+            'Soares (2007) menciona que, a pesar de que prevalece la exclusión de las mujeres de los espacios de toma de decisiones, también es cierto que existen avances en la materia que dan cuenta de procesos que apuntan hacia el empoderamiento femenino. Como ejemplo, en Bolivia, alrededor del 80% de los comités comunitarios de agua potable son administrados por mujeres, y resultados recientes de investigación reflejan que dichos comités son más eficientes que los liderados por hombres.',
+            'Kauffer y García (2003) documentan cómo la política pública hídrica ha logrado desarrollar una conciencia de preservación del líquido, pero no ha promovido activamente la participación femenina. Esta última se encuentra asociada directamente a factores relativos al género, así como a elementos socioeconómicos y demográficos entre los que pueden destacarse la división sexual del trabajo, la escolaridad, la edad y el estado civil, que limitan el acceso de las mujeres a los cargos en los patronatos de agua, impidiendo la participación y la integralidad de los programas.',
+          ],
+        },
+        {
+          titulo: 'Actividad práctica',
+          parrafos: ['Mapa participativo del rol de las mujeres en la gestión del agua de la comunidad.'],
+        },
+        {
+          titulo: 'Bibliografía',
+          lista: [
+            {
+              texto:
+                'Gutiérrez Villalpando, V., Nazar Beutelspacher, A., Zapata Martelo, E., Contreras Utrera, J., & Salvatierra Izaba, B. (2013). Género y participación de las mujeres en la gestión del agua en las subcuencas Río Sabinal y Cañón del Sumidero, Berriozábal, Chiapas. La ventana. Revista de estudios de género, 4(38), 246-276.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     slug: 'costos-servicio',
     titulo: 'Determinación de costos del servicio',
     tipo: 'texto',
