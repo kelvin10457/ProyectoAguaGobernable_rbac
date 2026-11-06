@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { prisma } from '../../shared/prisma';
 import { requireAuth, requireRole } from '../../middlewares/auth';
+import { aNumeroNoNegativo } from '../../shared/validacion';
 
 export const tarifaRouter = Router();
 
@@ -13,16 +14,20 @@ tarifaRouter.get('/config', async (_req, res) => {
 });
 
 tarifaRouter.put('/config', requireAuth, requireRole('JUNTA', 'ENTIDAD_RECTORA'), async (req, res) => {
-  const { cargoFijo, cargoVariable, umbralConsumo, descuentoAdultoMayorPct } = req.body ?? {};
+  const body = req.body ?? {};
 
-  const data: Record<string, unknown> = {};
-  if (cargoFijo !== undefined) data.cargoFijo = Number(cargoFijo);
-  if (cargoVariable !== undefined) data.cargoVariable = Number(cargoVariable);
-  if (umbralConsumo !== undefined) data.umbralConsumo = Number(umbralConsumo);
-  if (descuentoAdultoMayorPct !== undefined) data.descuentoAdultoMayorPct = Number(descuentoAdultoMayorPct);
+  const data: Record<string, number> = {};
+  for (const campo of ['cargoFijo', 'cargoVariable', 'umbralConsumo', 'descuentoAdultoMayorPct']) {
+    if (body[campo] === undefined) continue;
+    const numero = aNumeroNoNegativo(body[campo]);
+    if (numero === null) {
+      return res.status(400).json({ error: 'Los campos de tarifa deben ser números mayores o iguales a 0' });
+    }
+    data[campo] = numero;
+  }
 
-  if (Object.values(data).some((v) => typeof v === 'number' && Number.isNaN(v))) {
-    return res.status(400).json({ error: 'Los campos de tarifa deben ser numéricos' });
+  if (data.descuentoAdultoMayorPct > 100) {
+    return res.status(400).json({ error: 'El descuento no puede superar el 100 %' });
   }
 
   const existente = await prisma.tarifaConfig.findFirst();

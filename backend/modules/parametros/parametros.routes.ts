@@ -1,9 +1,23 @@
 import { Router } from 'express';
+import type { ParametroMes } from '@prisma/client';
 import { prisma } from '../../shared/prisma';
 import { requireAuth, requireRole } from '../../middlewares/auth';
 import { buscarEnCatalogo, CATALOGO_PARAMETROS } from '../../shared/parametrosCatalogo';
 
 export const parametrosRouter = Router();
+
+const FORMATO_SEMESTRE = /^\d{4}-(I|II)$/;
+
+function conCatalogo(parametro: ParametroMes) {
+  const catalogo = buscarEnCatalogo(parametro.nombre);
+  return {
+    ...parametro,
+    opciones: catalogo?.opciones,
+    opcionCumple: catalogo?.opcionCumple,
+    min: catalogo?.min,
+    max: catalogo?.max,
+  };
+}
 
 parametrosRouter.get('/', async (req, res) => {
   const mes = typeof req.query.mes === 'string' ? req.query.mes : undefined;
@@ -13,13 +27,13 @@ parametrosRouter.get('/', async (req, res) => {
     orderBy: [{ mes: 'desc' }, { categoria: 'asc' }, { nombre: 'asc' }],
   });
 
-  res.json(parametros.map((p: (typeof parametros)[number]) => ({ ...p, opciones: buscarEnCatalogo(p.nombre)?.opciones })));
+  res.json(parametros.map(conCatalogo));
 });
 
 parametrosRouter.post('/', requireAuth, requireRole('JUNTA'), async (req, res) => {
   const { mes } = req.body ?? {};
-  if (typeof mes !== 'string' || !mes) {
-    return res.status(400).json({ error: 'mes es requerido, ej. "2026-I" (semestre)' });
+  if (typeof mes !== 'string' || !FORMATO_SEMESTRE.test(mes)) {
+    return res.status(400).json({ error: 'mes es requerido con formato de semestre, ej. "2026-I" o "2026-II"' });
   }
 
   const yaExiste = await prisma.parametroMes.findFirst({ where: { mes } });
@@ -43,34 +57,56 @@ parametrosRouter.post('/', requireAuth, requireRole('JUNTA'), async (req, res) =
     ),
   );
 
-  res.status(201).json(filas);
+  res.status(201).json(filas.map(conCatalogo));
 });
 
-parametrosRouter.put('/:id', requireAuth, requireRole('JUNTA'), async (req, res) => {
-  const { id } = req.params as { id: string };
-  const { valor, estado } = req.body ?? {};
-
-  if (typeof valor !== 'string' || typeof estado !== 'string') {
-    return res.status(400).json({ error: 'valor y estado son requeridos' });
-  }
-  if (!['ok', 'alerta', 'pendiente'].includes(estado)) {
-    return res.status(400).json({ error: 'estado debe ser "ok", "alerta" o "pendiente"' });
+/** Actualiza varias filas en una sola transacción: se guardan todas o ninguna. */
+parametrosRouter.put('/', requireAuth, requireRole('JUNTA'), async (req, res) => {
+  const { filas } = req.body ?? {};
+  if (!Array.isArray(filas) || filas.length === 0) {
+    return res.status(400).json({ error: 'filas es requerido y no puede estar vacío' });
   }
 
-  const existente = await prisma.parametroMes.findUnique({ where: { id } });
-  if (!existente) {
-    return res.status(404).json({ error: 'Parámetro no encontrado' });
+  for (const fila of filas) {
+    if (typeof fila?.id !== 'string' || typeof fila.valor !== 'string' || typeof fila.estado !== 'string') {
+      return res.status(400).json({ error: 'Cada fila requiere id, valor y estado' });
+    }
+    if (!['ok', 'alerta', 'pendiente'].includes(fila.estado)) {
+      return res.status(400).json({ error: 'estado debe ser "ok", "alerta" o "pendiente"' });
+    }
   }
 
-  const opciones = buscarEnCatalogo(existente.nombre)?.opciones;
-  if (opciones && valor.trim() !== '' && !opciones.includes(valor)) {
-    return res.status(400).json({ error: `valor debe ser una de: ${opciones.join(', ')}` });
+  const ids: string[] = filas.map((fila) => fila.id);
+  const existentes = await prisma.parametroMes.findMany({ where: { id: { in: ids } } });
+  const porId = new Map(existentes.map((p) => [p.id, p]));
+
+  for (const fila of filas) {
+    const existente = porId.get(fila.id);
+    if (!existente) {
+      return res.status(404).json({ error: 'Parámetro no encontrado' });
+    }
+
+    const vacio = fila.valor.trim() === '';
+    const opciones = buscarEnCatalogo(existente.nombre)?.opciones;
+    if (opciones && !vacio && !opciones.includes(fila.valor)) {
+      return res.status(400).json({ error: `${existente.nombre}: valor debe ser una de: ${opciones.join(', ')}` });
+    }
+    if (vacio !== (fila.estado === 'pendiente')) {
+      return res.status(400).json({
+        error: `${existente.nombre}: una medición con valor debe marcarse como "ok" o "alerta", y una sin valor como "pendiente"`,
+      });
+    }
   }
 
-  const actualizado = await prisma.parametroMes.update({
-    where: { id },
-    data: { valor, estado, publicadoEn: new Date() },
-  });
+  const publicadoEn = new Date();
+  const actualizados = await prisma.$transaction(
+    filas.map((fila) =>
+      prisma.parametroMes.update({
+        where: { id: fila.id },
+        data: { valor: fila.valor, estado: fila.estado, publicadoEn },
+      }),
+    ),
+  );
 
-  res.json(actualizado);
+  res.json(actualizados.map(conCatalogo));
 });

@@ -33,7 +33,8 @@ export const CAPACITACIONES: Capacitacion[] = [
     titulo: 'Protocolos operativos',
     tipo: 'video',
     rolesAcceso: ['JUNTA', 'ENTIDAD_RECTORA'],
-    contenido: 'https://example.com/placeholder-video-protocolos-operativos',
+    // Pega aquí el enlace de YouTube o Vimeo. Mientras esté vacío, la página muestra "Video en preparación".
+    contenido: '',
   },
   {
     slug: 'participacion-comunitaria',
