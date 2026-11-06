@@ -63,6 +63,7 @@ export interface SeccionTexto {
   subtitulo?: string;
   lista?: { fuerte?: string; texto: string }[];
   tabla?: { columnas: string[]; filas: string[][] };
+  imagen?: { url: string; alt?: string };
 }
 
 export interface CosteoComponenteData {
@@ -81,8 +82,8 @@ export interface ContenidoTexto {
 }
 
 export type CapacitacionDetalle =
-  | { slug: string; titulo: string; tipo: 'video'; contenido: string; videoUrl?: string }
-  | { slug: string; titulo: string; tipo: 'texto'; contenido: ContenidoTexto; videoUrl?: string };
+  | { slug: string; titulo: string; tipo: 'video'; contenido: string; videoUrl?: string; imagenUrl?: string }
+  | { slug: string; titulo: string; tipo: 'texto'; contenido: ContenidoTexto; videoUrl?: string; imagenUrl?: string };
 
 export interface NoticiaData {
   id: string;
