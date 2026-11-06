@@ -249,6 +249,7 @@ Si se envía un token válido, estas rutas lo usan para incluir el contenido res
 | `slug` | Tipo | Acceso |
 |---|---|---|
 | `participacion-comunitaria` | `texto` | Público |
+| `rol-mujer-gestion-agua` | `texto` | Público |
 | `protocolos-operativos` | `video` | Junta, entidad rectora |
 | `costos-servicio` | `texto` | Junta, entidad rectora |
 

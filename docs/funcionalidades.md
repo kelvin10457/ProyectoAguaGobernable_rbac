@@ -24,6 +24,7 @@ No existe registro público. Las cuentas se crean con el [seed](despliegue.md#da
 | Reportes de daños: descripción y foto | Ver y enviar | Ver y enviar | Ver, enviar y eliminar |
 | Reportes de daños: nombre, cédula, medidor y teléfono | Oculto | Oculto | Ver |
 | Fortalecimiento: participación comunitaria | Ver | Ver | Ver |
+| Fortalecimiento: rol de la mujer en la gestión del agua | Ver | Ver | Ver |
 | Fortalecimiento: protocolos operativos | Oculto | Ver | Ver |
 | Fortalecimiento: costos del servicio | Oculto | Ver | Ver |
 
