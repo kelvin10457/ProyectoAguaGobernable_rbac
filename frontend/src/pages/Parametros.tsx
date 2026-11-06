@@ -1,6 +1,7 @@
 import Blueprint from '../components/Blueprint';
 import { useJaap } from '../state/JaapContext';
 import type { TablaFila } from '../state/JaapContext';
+import type { EstadoParametro } from '../types';
 
 function TablaParametros({ filas, titulo, nota, columnaLimite }: { filas: TablaFila[]; titulo: string; nota: string; columnaLimite: string }) {
   return (
@@ -49,7 +50,20 @@ function TablaParametros({ filas, titulo, nota, columnaLimite }: { filas: TablaF
                   )}
                 </td>
                 <td>
-                  <span className={`tag ${fila.tagClass}`}>{fila.estadoLabel}</span>
+                  {fila.editable && fila.valor.trim() !== '' ? (
+                    <select
+                      className="input max-w-[150px]"
+                      aria-label={`Estado de ${fila.nombre}`}
+                      value={fila.estado}
+                      onChange={(e) => fila.onChangeEstado(e.target.value as EstadoParametro)}
+                    >
+                      {fila.estado === 'pendiente' && <option value="pendiente">— Indicar —</option>}
+                      <option value="ok">Cumple</option>
+                      <option value="alerta">Fuera de rango</option>
+                    </select>
+                  ) : (
+                    <span className={`tag ${fila.tagClass}`}>{fila.estadoLabel}</span>
+                  )}
                 </td>
               </tr>
             ))}
@@ -69,7 +83,13 @@ export default function Parametros() {
     errorParametros,
     calidad,
     cantidad,
-    mesParametros,
+    semestres,
+    semestreVista,
+    verSemestre,
+    viendoHistorico,
+    semestreParaAbrir,
+    abriendoSemestre,
+    abrirSemestre,
     iniciarEdicion,
     cancelarEdicion,
     publicar,
@@ -84,19 +104,41 @@ export default function Parametros() {
           </div>
           <h1 className="m-0 mb-1.5 text-[clamp(28px,4.4vw,42px)]">El agua que consumimos</h1>
           <p className="m-0 text-[13px] text-text/65">
-            {puedeEditarParametros
+            {puedeEditarParametros && !viendoHistorico
               ? 'Editas los valores del semestre; al publicarlos se actualizan para las 525 familias.'
               : 'Valores publicados por la directiva. Vista de solo lectura.'}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
-          {mesParametros && (
+          {semestreVista && (
             <div className="field">
-              <label>Semestre</label>
-              <div className="input min-w-[150px] opacity-80">{mesParametros}</div>
+              <label htmlFor="semestre">Semestre</label>
+              <select
+                id="semestre"
+                className="input min-w-[150px]"
+                value={semestreVista}
+                disabled={editando}
+                onChange={(e) => verSemestre(e.target.value)}
+              >
+                {semestres.map((mes) => (
+                  <option key={mes} value={mes}>
+                    {mes}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
-          {puedeEditarParametros && (
+          {semestreParaAbrir && !editando && (
+            <button
+              type="button"
+              className="btn btn-primary self-end"
+              onClick={abrirSemestre}
+              disabled={abriendoSemestre}
+            >
+              {abriendoSemestre ? 'Abriendo…' : `Abrir semestre ${semestreParaAbrir}`}
+            </button>
+          )}
+          {puedeEditarParametros && !viendoHistorico && semestreVista && (
             <div className="flex items-end gap-2 self-end">
               {editando ? (
                 <>

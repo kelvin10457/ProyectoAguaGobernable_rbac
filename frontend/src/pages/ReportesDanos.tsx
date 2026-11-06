@@ -24,17 +24,17 @@ export default function ReportesDanos() {
 
   useEffect(() => {
     api
-      .getReportesDanos()
+      .getReportesDanos(token)
       .then(setReportes)
       .catch((err) => setError(err instanceof ApiError ? err.message : 'No se pudo cargar el listado de reportes'));
-  }, []);
+  }, [token]);
 
   const enviarReporte = () => {
     if (!form.nombre.trim() || !form.descripcion.trim()) return;
     setEnviando(true);
     setError(null);
     api
-      .createReporteDano(form)
+      .createReporteDano(form, token)
       .then((creado) => {
         setReportes((actual) => [creado, ...(actual ?? [])]);
         setForm(FORM_VACIO);
@@ -59,7 +59,8 @@ export default function ReportesDanos() {
       <h1 className="m-0 mb-2 text-[clamp(28px,4.4vw,42px)]">¿Viste algo dañado?</h1>
       <p className="max-w-[60ch] text-text/72">
         Cuéntanos qué pasó: fuga, tubería rota, medidor dañado u otro incidente. La directiva revisa los reportes y
-        los da de baja cuando quedan resueltos.
+        los da de baja cuando quedan resueltos. Tu nombre, cédula, medidor y teléfono solo los ve la directiva; la
+        descripción y la foto son públicas.
       </p>
 
       {error && (
@@ -140,10 +141,10 @@ export default function ReportesDanos() {
         <div className="stagger mt-[26px] grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] items-start gap-[22px]">
           {reportes.map((r) => (
             <Blueprint key={r.id} className="card overflow-hidden p-0">
-              {r.imagenUrl && <img src={r.imagenUrl} alt={`Daño reportado por ${r.nombre}`} className="aspect-[16/9] w-full object-cover" />}
+              {r.imagenUrl && <img src={r.imagenUrl} alt="Foto del daño reportado" className="aspect-[16/9] w-full object-cover" />}
               <div className="flex flex-1 flex-col gap-[7px] p-[18px]">
                 <div className="card-kicker">{formatearFecha(r.createdAt)}</div>
-                <div className="card-title">{r.nombre}</div>
+                {r.nombre && <div className="card-title">{r.nombre}</div>}
                 <p className="card-body">{r.descripcion}</p>
                 {(r.cedula || r.medidor || r.telefono) && (
                   <p className="m-0 text-[12px] opacity-60">

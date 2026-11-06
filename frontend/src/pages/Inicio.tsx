@@ -1,10 +1,31 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Blueprint from '../components/Blueprint';
+import { api } from '../lib/api';
 import { useJaap } from '../state/JaapContext';
+
+function Pendiente({ alDia, titulo, detalle, to }: { alDia: boolean; titulo: string; detalle: string; to: string }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 px-4 py-3.5">
+      <span className={`tag shrink-0 ${alDia ? 'tag-neutral' : 'tag-outline'}`}>{alDia ? 'Al día' : 'Pendiente'}</span>
+      <div className="min-w-0 flex-1">
+        <div className="font-heading text-[15px]">{titulo}</div>
+        <p className="m-0 text-[13px] opacity-70">{detalle}</p>
+      </div>
+      <Link to={to} className="btn btn-secondary shrink-0">
+        Revisar
+      </Link>
+    </div>
+  );
+}
 
 export default function Inicio() {
   const {
     role,
+    token,
+    costeo,
+    parametrosPendientes,
+    semestreParaAbrir,
     cumplenCount,
     totalParams,
     estadoGeneral,
@@ -23,6 +44,17 @@ export default function Inicio() {
   } = useJaap();
 
   const esJunta = role === 'junta';
+  const [reportesAbiertos, setReportesAbiertos] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!esJunta) return;
+    api
+      .getReportesDanos(token)
+      .then((reportes) => setReportesAbiertos(reportes.length))
+      .catch(() => undefined);
+  }, [esJunta, token]);
+
+  const costeoSinPrecio = costeo.filter((fila) => fila.precioUnitario === null).length;
   const datos = editandoInfo && borradorInfo ? borradorInfo : informacionGeneral;
 
   const familias = datos?.familias;
@@ -125,7 +157,7 @@ export default function Inicio() {
         <Blueprint className="card">
           <div className="card-title">Calcula tu valor a pagar</div>
           <p className="card-body">
-            Ingresa tu cédula, número de medidor y consumo del mes para conocer el valor de tu planilla.
+            Ingresa tu edad, número de medidor y consumo del mes para conocer el valor de tu planilla.
           </p>
           <div className="flex gap-3.5 text-xs text-text/65">
             <span>
@@ -155,32 +187,30 @@ export default function Inicio() {
         <div className="mt-8">
           <h4 className="mb-3">Pendientes de la directiva</h4>
           <Blueprint className="divide-y divide-divider overflow-hidden">
-            <div className="flex flex-wrap items-center gap-3 px-4 py-3.5">
-              <span className="tag tag-outline shrink-0">Por registrar</span>
-              <div className="min-w-0 flex-1">
-                <div className="font-heading text-[15px]">Retroalimentación semestral de parámetros</div>
-                <p className="m-0 text-[13px] opacity-70">
-                  Semestre {mesParametros ?? '—'} — pendiente de cargar las mediciones.
-                </p>
-              </div>
-              <Link to="/parametros" className="btn btn-secondary shrink-0">
-                Registrar
-              </Link>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 px-4 py-3.5">
-              <span className="tag tag-neutral shrink-0">Al día</span>
-              <div className="min-w-0 flex-1">
-                <div className="font-heading text-[15px]">Registro de usuarios</div>
-                <p className="m-0 text-[13px] opacity-70">525 conexiones activas, revisadas hace 12 días.</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 px-4 py-3.5">
-              <span className="tag tag-outline shrink-0">En proceso</span>
-              <div className="min-w-0 flex-1">
-                <div className="font-heading text-[15px]">Estructura de costos y tarifas</div>
-                <p className="m-0 text-[13px] opacity-70">Costeo del servicio en levantamiento — módulo aún no habilitado.</p>
-              </div>
-            </div>
+            <Pendiente
+              alDia={!semestreParaAbrir && parametrosPendientes === 0}
+              titulo="Mediciones de parámetros"
+              detalle={
+                semestreParaAbrir
+                  ? `Falta abrir el semestre ${semestreParaAbrir}.`
+                  : `Semestre ${mesParametros ?? '—'}: ${parametrosPendientes} de ${totalParams} sin registrar.`
+              }
+              to="/parametros"
+            />
+            <Pendiente
+              alDia={costeoSinPrecio === 0}
+              titulo="Costeo del servicio"
+              detalle={`${costeoSinPrecio} de ${costeo.length} componentes sin precio unitario.`}
+              to="/costeo"
+            />
+            <Pendiente
+              alDia={reportesAbiertos === 0}
+              titulo="Reportes de daños"
+              detalle={
+                reportesAbiertos === null ? 'Cargando reportes…' : `${reportesAbiertos} reportes por resolver.`
+              }
+              to="/reportes-danos"
+            />
           </Blueprint>
         </div>
       )}

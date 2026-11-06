@@ -10,6 +10,11 @@ export interface ParametroRow {
   estado: EstadoParametro;
   /** Si viene definido, el valor debe ser una de estas opciones (variable categórica). */
   opciones?: string[];
+  /** Opción que cumple la norma; sirve para sugerir el estado. */
+  opcionCumple?: string;
+  /** Rango numérico permitido; sirve para sugerir el estado. */
+  min?: number;
+  max?: number;
 }
 
 export interface TablaBorrador {
@@ -92,10 +97,11 @@ export interface NoticiaData {
 
 export interface ReporteDanoData {
   id: string;
-  nombre: string;
-  cedula: string | null;
-  medidor: string | null;
-  telefono: string | null;
+  /** Los datos personales solo llegan cuando consulta la junta. */
+  nombre?: string;
+  cedula?: string | null;
+  medidor?: string | null;
+  telefono?: string | null;
   descripcion: string;
   imagenUrl: string | null;
   createdAt: string;

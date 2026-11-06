@@ -36,6 +36,32 @@ interface BackendParametro {
   valor: string;
   estado: string;
   opciones?: string[];
+  opcionCumple?: string;
+  min?: number;
+  max?: number;
+}
+
+export interface ParametrosSemestre {
+  calidad: ParametroRow[];
+  cantidad: ParametroRow[];
+}
+
+let manejadorSesionExpirada: (() => void) | null = null;
+
+/** Registra qué hacer cuando el servidor rechaza el token de la sesión. */
+export function setManejadorSesionExpirada(manejador: () => void) {
+  manejadorSesionExpirada = manejador;
+}
+
+/** Fecha de expiración del JWT en milisegundos, o null si no se puede leer. */
+export function expiracionToken(token: string): number | null {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const { exp } = JSON.parse(atob(base64)) as { exp?: number };
+    return typeof exp === 'number' ? exp * 1000 : null;
+  } catch {
+    return null;
+  }
 }
 
 async function request<T>(path: string, options: RequestInit = {}, token?: string | null): Promise<T> {
@@ -47,6 +73,7 @@ async function request<T>(path: string, options: RequestInit = {}, token?: strin
   const body = res.status === 204 ? null : await res.json().catch(() => null);
 
   if (!res.ok) {
+    if (res.status === 401 && token) manejadorSesionExpirada?.();
     throw new ApiError(res.status, (body && body.error) || 'Error de red');
   }
 
@@ -69,6 +96,9 @@ function mapParametro(p: BackendParametro): ParametroRow {
     valor: p.valor,
     estado: p.estado as ParametroRow['estado'],
     opciones: p.opciones,
+    opcionCumple: p.opcionCumple,
+    min: p.min,
+    max: p.max,
   };
 }
 
@@ -84,20 +114,26 @@ export const api = {
   updateInformacionGeneral: (data: Partial<InformacionGeneralData>, token: string) =>
     request<InformacionGeneralData>('/informacion-general', { method: 'PUT', body: JSON.stringify(data) }, token),
 
-  async getParametrosMesActual(): Promise<{ mes: string | null; calidad: ParametroRow[]; cantidad: ParametroRow[] }> {
+  /** Devuelve los semestres del más reciente al más antiguo, con sus filas agrupadas. */
+  async getParametrosPorSemestre(): Promise<{ semestres: string[]; porSemestre: Record<string, ParametrosSemestre> }> {
     const filas = await request<BackendParametro[]>('/parametros');
-    if (filas.length === 0) return { mes: null, calidad: [], cantidad: [] };
-    const mesActual = filas[0].mes;
-    const delMes = filas.filter((f) => f.mes === mesActual);
-    return {
-      mes: mesActual,
-      calidad: delMes.filter((f) => f.categoria === 'calidad').map(mapParametro),
-      cantidad: delMes.filter((f) => f.categoria === 'cantidad').map(mapParametro),
-    };
+    const semestres = [...new Set(filas.map((f) => f.mes))];
+    const porSemestre: Record<string, ParametrosSemestre> = {};
+    for (const mes of semestres) {
+      const delMes = filas.filter((f) => f.mes === mes);
+      porSemestre[mes] = {
+        calidad: delMes.filter((f) => f.categoria === 'calidad').map(mapParametro),
+        cantidad: delMes.filter((f) => f.categoria === 'cantidad').map(mapParametro),
+      };
+    }
+    return { semestres, porSemestre };
   },
 
-  updateParametro: (id: string, data: { valor: string; estado: string }, token: string) =>
-    request<BackendParametro>(`/parametros/${id}`, { method: 'PUT', body: JSON.stringify(data) }, token),
+  crearSemestre: (mes: string, token: string) =>
+    request<BackendParametro[]>('/parametros', { method: 'POST', body: JSON.stringify({ mes }) }, token),
+
+  updateParametros: (filas: { id: string; valor: string; estado: string }[], token: string) =>
+    request<BackendParametro[]>('/parametros', { method: 'PUT', body: JSON.stringify({ filas }) }, token),
 
   getTarifaConfig: () => request<TarifaConfigData>('/tarifa/config'),
 
@@ -111,8 +147,10 @@ export const api = {
 
   getCosteo: () => request<CosteoComponenteData[]>('/costeo'),
 
-  updateCosteoComponente: (id: string, data: { cantidadAnual: number | null; precioUnitario: number | null }, token: string) =>
-    request<CosteoComponenteData>(`/costeo/${id}`, { method: 'PUT', body: JSON.stringify(data) }, token),
+  updateCosteo: (
+    filas: { id: string; cantidadAnual: number | null; precioUnitario: number | null }[],
+    token: string,
+  ) => request<CosteoComponenteData[]>('/costeo', { method: 'PUT', body: JSON.stringify({ filas }) }, token),
 
   getNoticias: () => request<NoticiaData[]>('/noticias'),
 
@@ -132,11 +170,12 @@ export const api = {
   deleteNoticia: (id: string, token: string) =>
     request<void>(`/noticias/${id}`, { method: 'DELETE' }, token),
 
-  getReportesDanos: () => request<ReporteDanoData[]>('/reportes-danos'),
+  getReportesDanos: (token?: string | null) => request<ReporteDanoData[]>('/reportes-danos', {}, token),
 
   createReporteDano: (
     data: { nombre: string; cedula: string; medidor: string; telefono: string; descripcion: string; imagenUrl: string },
-  ) => request<ReporteDanoData>('/reportes-danos', { method: 'POST', body: JSON.stringify(data) }),
+    token?: string | null,
+  ) => request<ReporteDanoData>('/reportes-danos', { method: 'POST', body: JSON.stringify(data) }, token),
 
   deleteReporteDano: (id: string, token: string) =>
     request<void>(`/reportes-danos/${id}`, { method: 'DELETE' }, token),

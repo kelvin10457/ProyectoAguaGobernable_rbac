@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { api, ApiError, mapAuthUser } from '../lib/api';
+import { api, ApiError, expiracionToken, mapAuthUser, setManejadorSesionExpirada, type ParametrosSemestre } from '../lib/api';
+import { semestreActual, sugerirEstado } from '../lib/parametros';
 import type {
   AuthUser,
   CosteoComponenteData,
@@ -11,6 +12,8 @@ import type {
 } from '../types';
 
 const AUTH_STORAGE_KEY = 'aguaGobernable.auth';
+/** Máximo admitido por setTimeout; un retraso mayor dispararía el temporizador de inmediato. */
+const MAX_TIMEOUT_MS = 2 ** 31 - 1;
 
 export interface TablaFila {
   nombre: string;
@@ -20,8 +23,10 @@ export interface TablaFila {
   tagClass: string;
   editable: boolean;
   valor: string;
+  estado: EstadoParametro;
   opciones?: string[];
   onChange: (valor: string) => void;
+  onChangeEstado: (estado: EstadoParametro) => void;
 }
 
 interface AuthStorage {
@@ -46,6 +51,7 @@ interface JaapContextValue {
   token: string | null;
   login: (email: string, password: string) => Promise<LoginResultado>;
   logout: () => void;
+  sesionExpirada: boolean;
 
   calidad: TablaFila[];
   cantidad: TablaFila[];
@@ -53,7 +59,15 @@ interface JaapContextValue {
   totalParams: number;
   estadoGeneral: string;
   mesParametros: string | null;
+  parametrosPendientes: number;
   puedeEditarParametros: boolean;
+  semestres: string[];
+  semestreVista: string | null;
+  verSemestre: (mes: string) => void;
+  viendoHistorico: boolean;
+  semestreParaAbrir: string | null;
+  abriendoSemestre: boolean;
+  abrirSemestre: () => void;
 
   editando: boolean;
   guardado: boolean;
@@ -132,6 +146,7 @@ function claseEtiqueta(estado: EstadoParametro): string {
 
 export function JaapProvider({ children }: { children: ReactNode }) {
   const [auth, setAuth] = useState<AuthStorage | null>(() => leerAuthGuardada());
+  const [sesionExpirada, setSesionExpirada] = useState(false);
   const role: Role = auth?.user.role ?? 'usuario';
   const isStaff = role !== 'usuario';
   const puedeEditarInfoGeneral = role === 'junta';
@@ -140,6 +155,10 @@ export function JaapProvider({ children }: { children: ReactNode }) {
   const token = auth?.token ?? null;
 
   const [mesParametros, setMesParametros] = useState<string | null>(null);
+  const [semestres, setSemestres] = useState<string[]>([]);
+  const [historialParametros, setHistorialParametros] = useState<Record<string, ParametrosSemestre>>({});
+  const [semestreElegido, setSemestreElegido] = useState<string | null>(null);
+  const [abriendoSemestre, setAbriendoSemestre] = useState(false);
   const [calidadPublicada, setCalidadPublicada] = useState<ParametroRow[]>([]);
   const [cantidadPublicada, setCantidadPublicada] = useState<ParametroRow[]>([]);
   const [editando, setEditando] = useState(false);
@@ -175,15 +194,18 @@ export function JaapProvider({ children }: { children: ReactNode }) {
   const [guardadoCosteo, setGuardadoCosteo] = useState(false);
   const [errorCosteo, setErrorCosteo] = useState<string | null>(null);
 
+  const cargarParametros = () =>
+    api.getParametrosPorSemestre().then(({ semestres: lista, porSemestre }) => {
+      const mes = lista[0] ?? null;
+      setSemestres(lista);
+      setHistorialParametros(porSemestre);
+      setMesParametros(mes);
+      setCalidadPublicada(mes ? porSemestre[mes].calidad : []);
+      setCantidadPublicada(mes ? porSemestre[mes].cantidad : []);
+    });
+
   useEffect(() => {
-    api
-      .getParametrosMesActual()
-      .then(({ mes, calidad: c, cantidad: q }) => {
-        setMesParametros(mes);
-        setCalidadPublicada(c);
-        setCantidadPublicada(q);
-      })
-      .catch(() => setErrorParametros('No se pudieron cargar los parámetros'));
+    cargarParametros().catch(() => setErrorParametros('No se pudieron cargar los parámetros'));
 
     api
       .getInformacionGeneral()
@@ -211,6 +233,7 @@ export function JaapProvider({ children }: { children: ReactNode }) {
       const { token: nuevoToken, user } = await api.login(email, password);
       const nuevaAuth: AuthStorage = { token: nuevoToken, user: mapAuthUser(user) };
       setAuth(nuevaAuth);
+      setSesionExpirada(false);
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nuevaAuth));
       return { ok: true };
     } catch (err) {
@@ -221,6 +244,7 @@ export function JaapProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setAuth(null);
+    setSesionExpirada(false);
     localStorage.removeItem(AUTH_STORAGE_KEY);
     setEditando(false);
     setBorrador(null);
@@ -230,31 +254,56 @@ export function JaapProvider({ children }: { children: ReactNode }) {
     setBorradorCosteo(null);
   };
 
+  const expirarSesion = () => {
+    logout();
+    setSesionExpirada(true);
+  };
+
+  useEffect(() => {
+    setManejadorSesionExpirada(expirarSesion);
+  }, []);
+
+  useEffect(() => {
+    if (!auth) return;
+    const expira = expiracionToken(auth.token);
+    if (expira === null || expira - Date.now() > MAX_TIMEOUT_MS) return;
+    const temporizador = setTimeout(expirarSesion, Math.max(0, expira - Date.now()));
+    return () => clearTimeout(temporizador);
+  }, [auth]);
+
+  const semestreVista = semestreElegido ?? mesParametros;
+  const viendoHistorico = semestreVista !== mesParametros;
+
   function filas(clave: 'calidad' | 'cantidad'): TablaFila[] {
     const editandoAhora = editando && puedeEditarParametros;
     const publicadas = clave === 'calidad' ? calidadPublicada : cantidadPublicada;
-    const fuente = editandoAhora && borrador ? borrador[clave] : publicadas;
+    const historicas = semestreVista ? historialParametros[semestreVista]?.[clave] ?? [] : [];
+    const fuente = editandoAhora && borrador ? borrador[clave] : viendoHistorico ? historicas : publicadas;
 
     return fuente.map((fila, indice) => {
       const vacio = fila.valor.trim() === '';
       const estado = vacio ? 'pendiente' : fila.estado;
+      const actualizarFila = (cambios: Partial<ParametroRow>) => {
+        setBorrador((actual) => {
+          if (!actual) return actual;
+          const filasClave = actual[clave].slice();
+          filasClave[indice] = { ...filasClave[indice], ...cambios };
+          return { ...actual, [clave]: filasClave };
+        });
+      };
       return {
         nombre: fila.nombre,
         limite: fila.limite,
         valor: fila.valor,
+        estado,
         valorTexto: vacio ? '—' : fila.valor,
         estadoLabel: etiquetaEstado(estado),
         tagClass: claseEtiqueta(estado),
         editable: editandoAhora,
         opciones: fila.opciones,
-        onChange: (valor: string) => {
-          setBorrador((actual) => {
-            if (!actual) return actual;
-            const filasClave = actual[clave].slice();
-            filasClave[indice] = { ...filasClave[indice], valor };
-            return { ...actual, [clave]: filasClave };
-          });
-        },
+        // Si el valor no permite decidir (ej. "<1"), queda pendiente hasta que la directiva indique el estado.
+        onChange: (valor: string) => actualizarFila({ valor, estado: sugerirEstado(fila, valor) ?? 'pendiente' }),
+        onChangeEstado: (nuevoEstado: EstadoParametro) => actualizarFila({ estado: nuevoEstado }),
       };
     });
   }
@@ -268,10 +317,14 @@ export function JaapProvider({ children }: { children: ReactNode }) {
     [calidadPublicada, cantidadPublicada],
   );
   const totalParams = calidadPublicada.length + cantidadPublicada.length;
+  const parametrosPendientes = calidadPublicada.concat(cantidadPublicada).filter((f) => f.valor.trim() === '').length;
+  const semestreCalendario = semestreActual();
+  const semestreParaAbrir =
+    puedeEditarParametros && (!mesParametros || semestreCalendario > mesParametros) ? semestreCalendario : null;
   const estadoGeneral = totalParams > 0 && cumplenCount === totalParams ? 'Todo en norma' : 'Con observaciones';
 
   const iniciarEdicion = () => {
-    if (!puedeEditarParametros) return;
+    if (!puedeEditarParametros || viendoHistorico) return;
     setBorrador({ calidad: calidadPublicada.slice(), cantidad: cantidadPublicada.slice() });
     setEditando(true);
     setGuardado(false);
@@ -283,17 +336,27 @@ export function JaapProvider({ children }: { children: ReactNode }) {
   };
   const publicar = () => {
     if (!borrador || !token) return;
+
+    const filasBorrador = borrador.calidad.concat(borrador.cantidad);
+    const sinEstado = filasBorrador.filter((fila) => fila.valor.trim() !== '' && fila.estado === 'pendiente');
+    if (sinEstado.length > 0) {
+      setErrorParametros(`Indica si cumple o está fuera de rango: ${sinEstado.map((f) => f.nombre).join(', ')}`);
+      return;
+    }
+
     setGuardandoParametros(true);
     setErrorParametros(null);
 
-    const filasAEnviar = borrador.calidad.concat(borrador.cantidad).filter((fila) => fila.id);
+    const filasAEnviar = filasBorrador
+      .filter((fila) => fila.id)
+      .map((fila) => ({
+        id: fila.id as string,
+        valor: fila.valor,
+        estado: fila.valor.trim() === '' ? 'pendiente' : fila.estado,
+      }));
 
-    Promise.all(
-      filasAEnviar.map((fila) => {
-        const estado = fila.valor.trim() === '' ? 'pendiente' : fila.estado;
-        return api.updateParametro(fila.id as string, { valor: fila.valor, estado }, token);
-      }),
-    )
+    api
+      .updateParametros(filasAEnviar, token)
       .then(() => {
         setCalidadPublicada(borrador.calidad);
         setCantidadPublicada(borrador.cantidad);
@@ -305,6 +368,24 @@ export function JaapProvider({ children }: { children: ReactNode }) {
         setErrorParametros(err instanceof ApiError ? err.message : 'No se pudieron publicar los cambios');
       })
       .finally(() => setGuardandoParametros(false));
+  };
+
+  const abrirSemestre = () => {
+    if (!token || !semestreParaAbrir) return;
+    setAbriendoSemestre(true);
+    setErrorParametros(null);
+    setGuardado(false);
+
+    api
+      .crearSemestre(semestreParaAbrir, token)
+      .then(() => {
+        setSemestreElegido(null);
+        return cargarParametros();
+      })
+      .catch((err) => {
+        setErrorParametros(err instanceof ApiError ? err.message : 'No se pudo abrir el semestre');
+      })
+      .finally(() => setAbriendoSemestre(false));
   };
 
   const iniciarEdicionInfo = () => {
@@ -400,11 +481,11 @@ export function JaapProvider({ children }: { children: ReactNode }) {
     setGuardandoCosteo(true);
     setErrorCosteo(null);
 
-    Promise.all(
-      borradorCosteo.map((fila) =>
-        api.updateCosteoComponente(fila.id, { cantidadAnual: fila.cantidadAnual, precioUnitario: fila.precioUnitario }, token),
-      ),
-    )
+    api
+      .updateCosteo(
+        borradorCosteo.map(({ id, cantidadAnual, precioUnitario }) => ({ id, cantidadAnual, precioUnitario })),
+        token,
+      )
       .then(() => {
         setCosteoPublicado(borradorCosteo);
         setEditandoCosteo(false);
@@ -423,13 +504,22 @@ export function JaapProvider({ children }: { children: ReactNode }) {
     token,
     login,
     logout,
+    sesionExpirada,
     calidad,
     cantidad,
     cumplenCount,
     totalParams,
     estadoGeneral,
     mesParametros,
+    parametrosPendientes,
     puedeEditarParametros,
+    semestres,
+    semestreVista,
+    verSemestre: setSemestreElegido,
+    viendoHistorico,
+    semestreParaAbrir,
+    abriendoSemestre,
+    abrirSemestre,
     editando: editando && puedeEditarParametros,
     guardado,
     guardandoParametros,
