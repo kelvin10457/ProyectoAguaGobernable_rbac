@@ -31,6 +31,8 @@ No existe registro público. Las cuentas se crean con el [seed](despliegue.md#da
 
 ### Inicio (`/`)
 
+Cuando la junta publica la cantidad de familias desde Inicio o Información general, el número se actualiza en el logo, en el lema del encabezado y en los textos que lo mencionan.
+
 Muestra el resumen de la comunidad, el estado de los parámetros del último semestre y accesos a la calculadora y a las capacitaciones. La junta también ve sus pendientes, calculados con datos reales: mediciones sin registrar o semestre sin abrir, componentes del costeo sin precio y reportes por resolver.
 
 ### Información general (`/informacion-general`)
