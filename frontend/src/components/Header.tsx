@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useJaap } from '../state/JaapContext';
+import Logo from './Logo';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Inicio', end: true },
@@ -13,7 +14,7 @@ const NAV_ITEMS = [
 ];
 
 export default function Header() {
-  const { isStaff, logout } = useJaap();
+  const { isStaff, logout, informacionGeneral } = useJaap();
   const navigate = useNavigate();
 
   return (
@@ -22,15 +23,11 @@ export default function Header() {
       <div className="mx-auto w-full max-w-[1120px] px-[18px] py-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <img
-              src="/logo.png"
-              alt="Logo JAAP El Limón–Havoline"
-              className="h-12 w-12 object-contain transition-transform duration-300 hover:scale-110 hover:rotate-[-4deg]"
-            />
+            <Logo className="h-14 w-14 transition-transform duration-300 hover:scale-110 hover:rotate-[-4deg]" />
             <div className="leading-tight">
               <div className="font-heading text-lg font-semibold text-accent-900">JAAP El Limón–Havoline</div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-green-600">
-                525 gotas de esperanza
+                {informacionGeneral ? `${informacionGeneral.familias} gotas de esperanza` : 'Gotas de esperanza'}
               </div>
             </div>
           </div>

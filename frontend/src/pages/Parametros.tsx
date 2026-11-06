@@ -76,6 +76,7 @@ function TablaParametros({ filas, titulo, nota, columnaLimite }: { filas: TablaF
 
 export default function Parametros() {
   const {
+    informacionGeneral,
     puedeEditarParametros,
     editando,
     guardado,
@@ -105,7 +106,7 @@ export default function Parametros() {
           <h1 className="m-0 mb-1.5 text-[clamp(28px,4.4vw,42px)]">El agua que consumimos</h1>
           <p className="m-0 text-[13px] text-text/65">
             {puedeEditarParametros && !viendoHistorico
-              ? 'Editas los valores del semestre; al publicarlos se actualizan para las 525 familias.'
+              ? `Editas los valores del semestre; al publicarlos se actualizan para las ${informacionGeneral?.familias ?? ''} familias.`
               : 'Valores publicados por la directiva. Vista de solo lectura.'}
           </p>
         </div>
