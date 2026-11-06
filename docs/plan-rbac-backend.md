@@ -1,6 +1,9 @@
 # Plan: Backend con Role-Based Access Control (RBAC)
 
-Estado: **planeación**, sin código todavía. Este documento resume lo acordado en el chat para no perderlo.
+> [!NOTE]
+> **Documento histórico.** Este plan ya se implementó y el código difiere en varios puntos: la base de datos es PostgreSQL, no MySQL, y los permisos cambiaron. Para el estado actual, consulta [Funcionalidades](funcionalidades.md), [Arquitectura](arquitectura.md) y [API REST](api.md).
+
+Estado original: **planeación**, sin código todavía. Este documento resume lo acordado en el chat para no perderlo.
 
 ## 1. Roles
 

@@ -1,29 +1,29 @@
-# Plataforma JAAP El Limón–Havoline
+# Frontend: Plataforma JAAP El Limón–Havoline
 
-Real implementation of the `Plataforma JAAP.dc.html` design (see `../README.md`, `../chats/chat1.md`, and `../project/`) — a platform for the JAAP El Limón–Havoline water board: general info, capacity-building videos, monthly water-quality/quantity parameters, and a tariff calculator.
+Aplicación React de la plataforma. Requiere el [backend](../backend) para obtener sus datos.
 
-Stack: React 19 + TypeScript + Tailwind CSS v4 (Vite). This is a frontend-only build: there is no backend, admin login accepts any credentials, and edits (parameter values, tariff charges) only persist in memory for the current session — this matches the approved mockup's behavior.
+**Stack:** React 19, TypeScript, React Router 7, Tailwind CSS 4 y Vite.
 
-## Develop
+## Desarrollo
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Build
+Por defecto usa la API de `http://localhost:4000`. Para cambiarla, define `VITE_API_URL` en `frontend/.env`.
 
-```bash
-npm run build
-```
+## Comandos
 
-## Structure
+| Comando | Qué hace |
+|---|---|
+| `npm run dev` | Inicia el servidor de desarrollo |
+| `npm run build` | Verifica los tipos y genera `dist/` |
+| `npm run lint` | Ejecuta oxlint |
+| `npm run preview` | Sirve localmente la versión compilada |
 
-- `src/state/JaapContext.tsx` — the app's mock state and business logic (role, parámetros edit/publish, tarifa calculator), mirroring the logic embedded in the original `.dc.html` mockup.
-- `src/pages/` — one component per route (Inicio, Información general, Fortalecimiento, Parámetros, Tarifa, Ingreso).
-- `src/components/` — shared chrome (`Header`, `Footer`) and the `Blueprint` frame (the design system's hairline-border + corner-mark wrapper).
-- `src/index.css` — the "Industry" design system's tokens and component classes (buttons, cards, tags, tables, inputs), ported from `../project/industry-styles.css`.
+## Más información
 
-## Known placeholders
-
-Per the mockup: no real photo/map/video assets, and "Costeo del servicio" is intentionally out of scope (shown as "en construcción").
+- [Puesta en marcha completa](../README.md#puesta-en-marcha-local)
+- [Arquitectura del frontend](../docs/arquitectura.md#frontend)
+- [Funcionalidades y permisos](../docs/funcionalidades.md)
