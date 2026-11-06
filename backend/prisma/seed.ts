@@ -7,18 +7,24 @@ import { semestreActual } from '../shared/periodo';
 
 const prisma = new PrismaClient();
 
+function variableRequerida(nombre: string): string {
+  const valor = process.env[nombre];
+  if (!valor) throw new Error(`Falta la variable de entorno ${nombre}`);
+  return valor;
+}
+
 async function seedUsuarios() {
   const cuentas = [
     {
       role: 'JUNTA' as const,
-      email: process.env.SEED_JUNTA_EMAIL ?? 'junta@limonhavoline.test',
-      password: process.env.SEED_JUNTA_PASSWORD ?? 'junta12345',
+      email: variableRequerida('SEED_JUNTA_EMAIL'),
+      password: variableRequerida('SEED_JUNTA_PASSWORD'),
       nombre: 'Directiva JAAP El Limón–Havoline',
     },
     {
       role: 'ENTIDAD_RECTORA' as const,
-      email: process.env.SEED_ENTIDAD_RECTORA_EMAIL ?? 'entidadrectora@limonhavoline.test',
-      password: process.env.SEED_ENTIDAD_RECTORA_PASSWORD ?? 'entidad12345',
+      email: variableRequerida('SEED_ENTIDAD_RECTORA_EMAIL'),
+      password: variableRequerida('SEED_ENTIDAD_RECTORA_PASSWORD'),
       nombre: 'Entidad Rectora',
     },
   ];
@@ -68,37 +74,24 @@ async function seedTarifaConfig() {
   console.log('Configuración de tarifa inicial creada');
 }
 
-const VALORES_INICIALES: Record<string, { valor: string; estado: string }> = {
-  Color: { valor: '8', estado: 'ok' },
-  Turbiedad: { valor: '2.1', estado: 'ok' },
-  Sabor: { valor: 'Aceptable', estado: 'ok' },
-  Olor: { valor: 'Aceptable', estado: 'ok' },
-  Coliformes: { valor: '0', estado: 'ok' },
-  Plaguicidas: { valor: '0.01', estado: 'ok' },
-  Cianotoxinas: { valor: '', estado: 'pendiente' },
-  'Presión (red / domiciliaria)': { valor: '8', estado: 'alerta' },
-};
-
 async function seedParametros() {
   const mes = semestreActual(); // "YYYY-I" o "YYYY-II"
   const existente = await prisma.parametroMes.findFirst({ where: { mes } });
   if (existente) return;
 
   await prisma.$transaction(
-    CATALOGO_PARAMETROS.map((item) => {
-      const inicial = VALORES_INICIALES[item.nombre] ?? { valor: '', estado: 'pendiente' };
-      return prisma.parametroMes.create({
+    CATALOGO_PARAMETROS.map((item) =>
+      prisma.parametroMes.create({
         data: {
           mes,
           categoria: item.categoria,
           nombre: item.nombre,
           limite: item.limite,
-          valor: inicial.valor,
-          estado: inicial.estado,
-          publicadoEn: new Date(),
+          valor: '',
+          estado: 'pendiente',
         },
-      });
-    }),
+      }),
+    ),
   );
   console.log(`Parámetros iniciales creados para el semestre ${mes}`);
 }

@@ -2,10 +2,11 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../../shared/prisma';
 import { signToken } from '../../shared/jwt';
+import { limiteLogin } from '../../middlewares/rateLimit';
 
 export const authRouter = Router();
 
-authRouter.post('/login', async (req, res) => {
+authRouter.post('/login', limiteLogin, async (req, res) => {
   const { email, password } = req.body ?? {};
 
   if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
