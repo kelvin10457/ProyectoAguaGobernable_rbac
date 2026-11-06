@@ -32,7 +32,7 @@ export default function Tarifa() {
     total,
   } = useJaap();
 
-  const totalTexto = consumoNum ? `$${total.toFixed(2)}` : `$${cargoFijo.toFixed(2)}`;
+  const totalTexto = `$${total.toFixed(2)}`;
   const resumenConsumo = consumoNum
     ? `Consumo de ${consumoNum} m³ · ${calculado ? 'cálculo confirmado' : 'estimación en vivo'}`
     : 'Ingresa tu consumo del mes para ver el valor completo.';

@@ -5,9 +5,7 @@ export default function Footer() {
         <span className="font-heading text-sm font-semibold tracking-[0.02em] text-white">
           JAAP El Limón–Havoline
         </span>
-        <span>Recinto El Limón, cantón Empalme · El Guayas</span>
-        <span className="ml-auto text-accent-300">Módulo de costeo del servicio en construcción</span>
-      </div>
+        <span>Recinto El Limón, cantón Empalme · El Guayas</span>      </div>
     </footer>
   );
 }

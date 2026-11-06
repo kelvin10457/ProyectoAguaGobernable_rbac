@@ -8,6 +8,7 @@ function formatoUsd(valor: number): string {
 
 export default function Costeo() {
   const {
+    isStaff,
     puedeEditarCosteo,
     costeo,
     editandoCosteo,
@@ -148,9 +149,14 @@ export default function Costeo() {
       </Blueprint>
 
       <p className="mt-[18px] text-xs opacity-55">
-        Metodología según la Regulación Nro. DIR-ARCA.RG-006-2017 del ARCA. Ver la capacitación{' '}
-        <Link to="/fortalecimiento/costos-servicio">Determinación de costos del servicio</Link> para el detalle
-        conceptual.
+        Metodología según la Regulación Nro. DIR-ARCA.RG-006-2017 del ARCA.
+        {isStaff && (
+          <>
+            {' '}
+            Ver la capacitación <Link to="/fortalecimiento/costos-servicio">Determinación de costos del servicio</Link>{' '}
+            para el detalle conceptual.
+          </>
+        )}
       </p>
     </section>
   );

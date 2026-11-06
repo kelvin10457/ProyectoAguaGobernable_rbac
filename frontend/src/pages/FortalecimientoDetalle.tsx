@@ -165,12 +165,20 @@ export default function FortalecimientoDetalle() {
 
       {capacitacion.tipo === 'video' ? (
         <Blueprint as="figure" className="m-0 max-w-[640px] overflow-hidden">
-          <div className="relative grid aspect-video place-items-center bg-[repeating-linear-gradient(135deg,var(--color-neutral-200)_0_10px,var(--color-neutral-300)_10px_20px)]">
-            <div className="grid h-[74px] w-[74px] place-items-center border-[1.5px] border-accent-800 bg-bg/75">
-              <div className="ml-1.5 h-0 w-0 border-y-[13px] border-l-[20px] border-y-transparent border-l-accent-800" />
+          {capacitacion.contenido ? (
+            <iframe
+              src={obtenerEmbedVideo(capacitacion.contenido)}
+              className="aspect-video w-full border-0"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title={capacitacion.titulo}
+            />
+          ) : (
+            <div className="grid aspect-video place-items-center bg-[repeating-linear-gradient(135deg,var(--color-neutral-200)_0_10px,var(--color-neutral-300)_10px_20px)]">
+              <span className="bg-bg/75 px-3 py-1.5 text-sm">Video en preparación</span>
             </div>
-          </div>
-          <figcaption className="mt-1 break-all text-[11px] text-text/55">{capacitacion.contenido}</figcaption>
+          )}
         </Blueprint>
       ) : (
         <ContenidoTextoView contenido={capacitacion.contenido} />
